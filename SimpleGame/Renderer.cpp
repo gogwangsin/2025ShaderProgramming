@@ -49,23 +49,36 @@ void Renderer::CreateVertexBufferObjects()
 
 
 	// lecture2
-	float test[]
+	float testPos[]
 		=
 	{
 		0.f, 0.f, 0.f,
-		1.f, 0.f , 0.f,
-		 1.f, 1.f, 0.f, //Triangle1
+		1.f, 0.f, 0.f,
+		1.f, 1.f, 0.f, //Triangle1
 	};
 	// -> 반시계로
 
-	glGenBuffers(1, &m_VBOTest);
+	glGenBuffers(1, &m_VBOTestPos);
 	// 아직 GPU 메모리가 생성되지 않았음, ID만 받음
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTest);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
 	// GL_ARRAY_BUFFER라는 방 하나, testID를 Array Buffer로 쓴다고 의미를 부여하는거로 이해
 	// 아낌없이 쓰도록 하자
-	glBufferData(GL_ARRAY_BUFFER, sizeof(test), test, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(testPos), testPos, GL_STATIC_DRAW);
 	// GPU에 데이터를 올려주는 작업
 
+	// lecture3
+	float testColor[]
+		=
+	{
+		1.f, 0.f, 0.f, 1.f,
+		0.f, 1.f, 0.f, 1.f,
+		0.f, 0.f, 1.f, 1.f    //Triangle1
+	};
+	// -> 반시계로
+
+	glGenBuffers(1, &m_VBOTestColor);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestColor);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(testColor), testColor, GL_STATIC_DRAW);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -214,19 +227,26 @@ void Renderer::DrawTest()
 	//Program select
 	glUseProgram(m_SolidRectShader);
 	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), 0, 0, 0, 1);
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), 1, 0, 0, 1);
+	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), 1, 1, 1, 1);
 
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
-	glEnableVertexAttribArray(attribPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTest);
+	// Location 포지션 받고, Enable하고, 바인드, 바인드되어 있는 포인터와 시작점을 받아오기
+	int aPosLoc = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	int aColorLoc = glGetAttribLocation(m_SolidRectShader, "a_Color");
 
-	glVertexAttribPointer(
-		attribPosition, 3, GL_FLOAT,
-		GL_FALSE, sizeof(float) * 3, 0);
-
-
+	glEnableVertexAttribArray(aPosLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
+	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDisableVertexAttribArray(attribPosition);
+
+	glEnableVertexAttribArray(aColorLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestColor);
+	glVertexAttribPointer(aColorLoc, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	// 위 4가지 방법을 동일하게 하면 된다.
+	// ( glGetAttribLocation, glEnableVertexAttribArray, glBindBuffer, glVertexAttribPointer )
+
+	glDisableVertexAttribArray(aPosLoc);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

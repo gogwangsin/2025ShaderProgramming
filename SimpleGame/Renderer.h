@@ -33,7 +33,10 @@ private:
 	GLuint m_VBORect = 0;
 	GLuint m_SolidRectShader = 0;
 
-	// lecture2
-	GLuint m_VBOTest = 0;
+	// lecture2, 3
+	GLuint m_VBOTestPos = 0;
+	// vertex 데이터인데 Position 위치 정보만 갖는
+
+	GLuint m_VBOTestColor = 0;
 };
 
