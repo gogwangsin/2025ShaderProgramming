@@ -5,6 +5,8 @@
 in vec3 a_Position;
 in vec4 a_Color;
 
+out vec4 v_ClipPos;
+
 // Color를 출력하자
 out vec4 v_Color;
 
@@ -17,6 +19,8 @@ void main()
 	newPosition.z = 0;
 	newPosition.w= 1;
 	gl_Position = newPosition;
+
+	v_ClipPos = gl_Position; // Clip Space 그대로 FS로 전달
 
 	v_Color = a_Color;
 }
