@@ -6,7 +6,6 @@ Renderer::Renderer(int windowSizeX, int windowSizeY)
 	Initialize(windowSizeX, windowSizeY);
 }
 
-
 Renderer::~Renderer()
 {
 }
@@ -36,16 +35,25 @@ bool Renderer::IsInitialized()
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float rect[]
+	// 사각형(Rectangle) 정점 데이터를 GPU에 올리는 과정
+	// 좌표를 m_WindowSizeX, m_WindowSizeY로 나눠서 픽셀 단위 → NDC 비율로 변환
+	float rect[] 
 		=
 	{
-		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, -1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, //Triangle1
-		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,  1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, 
+		-1.f / m_WindowSizeX,  1.f / m_WindowSizeY, 0.f, 
+		 1.f / m_WindowSizeX,  1.f / m_WindowSizeY, 0.f, //Triangle1
+
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,  
+		 1.f / m_WindowSizeX,  1.f / m_WindowSizeY, 0.f, 
+		 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
 	};
 
-	glGenBuffers(1, &m_VBORect);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+	glGenBuffers(1, &m_VBORect);				// GPU에서 버텍스 버퍼 객체(VBO) 하나 생성, m_VBORect에 ID 저장
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);   // 지금부터의 버퍼 작업을 m_VBORect에 적용, GL_ARRAY_BUFFER → 정점 데이터용 버퍼 타입
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+	// sizeof(rect) → 배열 크기(Byte), rect → 실제 데이터 포인터, GL_STATIC_DRAW → 데이터는 자주 안 바뀜 힌트
+	//	GPU 메모리에 정점 데이터를 복사
 
 
 	// lecture2
@@ -58,10 +66,8 @@ void Renderer::CreateVertexBufferObjects()
 	};
 	// -> 반시계로
 
-	glGenBuffers(1, &m_VBOTestPos);
-	// 아직 GPU 메모리가 생성되지 않았음, ID만 받음
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
-	// GL_ARRAY_BUFFER라는 방 하나, testID를 Array Buffer로 쓴다고 의미를 부여하는거로 이해
+	glGenBuffers(1, &m_VBOTestPos);				 // 아직 GPU 메모리가 생성되지 않았음, int 숫자 ID만 받음
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos); // GL_ARRAY_BUFFER라는 방 하나, 숫자ID(vbo)를 Array Buffer로 쓴다고 의미를 부여하는거로 이해 
 	// 아낌없이 쓰도록 하자
 	glBufferData(GL_ARRAY_BUFFER, sizeof(testPos), testPos, GL_STATIC_DRAW);
 	// GPU에 데이터를 올려주는 작업
@@ -83,6 +89,8 @@ void Renderer::CreateVertexBufferObjects()
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
 {
+	// 목적: 특정 쉐이더(버텍스 또는 프래그먼트)를 프로그램에 추가
+
 	// 쉐이더 오브젝트 생성
 	GLuint ShaderObj = glCreateShader(ShaderType);
 
@@ -137,12 +145,28 @@ bool Renderer::ReadFile(char* filename, std::string* target)
 		target->append(line.c_str());
 		target->append("\n");
 	}
+	// 1. getline(file, line)
+	//	파일(file)에서 한 줄씩 읽어서 line 문자열에 저장, 줄바꿈 문자는 포함되지 않음
+
+	// 2. target->append(line.c_str())
+	//	 읽은 한 줄을** 목표 문자열(target)** 에 추가
+	//
+	//   c_str()로 C 스타일 문자열로 변환해 append 가능
+	//	line.c_str() → 내부 버퍼(const char*) 포인터 반환
+
+	// 3.target->append("\n")
+	//	원래 줄바꿈을 복원
+	//  쉐이더 코드는 줄 단위로 의미가 있기 때문에 반드시 필요
+
 	return true;
 }
 
 GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 {
-	GLuint ShaderProgram = glCreateProgram(); // 빈 쉐이더 프로그램 생성
+	// 목적: 버텍스/프래그먼트 쉐이더 파일을 읽어 컴파일 + 링크 + 검증 후 프로그램 반환
+
+	GLuint ShaderProgram = glCreateProgram(); 
+	// 빈 쉐이더 프로그램 생성 -> 여러 쉐이더를 묶는 컨테이너 역할
 
 	if (ShaderProgram == 0) { // 쉐이더 프로그램이 만들어졌는지 확인
 		fprintf(stderr, "Error creating shader program\n");
@@ -171,7 +195,8 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	GLint Success = 0;
 	GLchar ErrorLog[1024] = { 0 };
 
-	//Attach 완료된 shaderProgram을 링킹함
+	//Attach 완료된 shaderProgram을 링킹함 -> GPU에서 실제 사용 가능한 상태로 연결
+	// 연결된 여러 쉐이더 객체들을 통합해 연결하는 것
 	glLinkProgram(ShaderProgram);
 
 	//링크가 성공했는지 확인
@@ -192,7 +217,7 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 		return -1;
 	}
 
-	glUseProgram(ShaderProgram);
+	glUseProgram(ShaderProgram); // 이후 그리기 호출 시 이 프로그램 사용
 	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done.";
 
 	return ShaderProgram;
@@ -207,19 +232,20 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	//Program select
 	glUseProgram(m_SolidRectShader);
 
+	// u_Trans: 사각형 위치(x, y), z, 크기(size)
 	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), newX, newY, 0, size);
 	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), r, g, b, a);
 
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position"); // a_Position → 쉐이더에서 각 정점 좌표 받는 변수
 	glEnableVertexAttribArray(attribPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect); // VBO(m_VBORect) 바인딩 → GPU에 올라간 사각형 정점 사용
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); // VBO 데이터와 쉐이더 속성 연결
 
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_TRIANGLES, 0, 6); // 6개의 정점 → 2개의 삼각형 → 사각형
 
-	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribPosition); // 정점 속성 비활성화 → 다른 그리기 코드에 영향 안 주도록
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); // 프레임버퍼 바인딩 해제 → 기본 화면으로 복귀
 }
 
 void Renderer::DrawTest()
@@ -236,6 +262,7 @@ void Renderer::DrawTest()
 	glEnableVertexAttribArray(aPosLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
 	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	// → 즉, "0번 슬롯(a_Position)은 이 VBO에서 vec3(float 3개) 형태로 읽어라" 라고 알려주는 거죠.
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	glEnableVertexAttribArray(aColorLoc);
@@ -247,12 +274,22 @@ void Renderer::DrawTest()
 	// ( glGetAttribLocation, glEnableVertexAttribArray, glBindBuffer, glVertexAttribPointer )
 
 	glDisableVertexAttribArray(aPosLoc);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// 어떤 프레임버퍼에 렌더링할지를 선택하는 OpenGL 함수
+	// 0 = 기본 윈도우 프레임버퍼
+	// 다른 숫자 = glGenFramebuffers로 만든 Frame Buffer Object
 }
 
 
 void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 {
+	// 윈도우 좌표를 OpenGL NDC 좌표로 변환하는 역할
+	// x, y : 윈도우(픽셀) 좌표, 예: (0 ~ m_WindowSizeX, 0 ~ m_WindowSizeY)
+	// 
+	// OpenGL **NDC(Normalized Device Coordinates)**는 좌표 범위가 [-1, 1]
+	// 하지만 이 함수는 단순히 0~2 범위로 매핑
+
 	*newX = x * 2.f / m_WindowSizeX;
 	*newY = y * 2.f / m_WindowSizeY;
 }

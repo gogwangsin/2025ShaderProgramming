@@ -6,12 +6,17 @@ it under the terms of the What The Hell License. Do it plz.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY.
+
+💡 한 줄 요약:
+“FreeGLUT + GLEW로 윈도우 만들고, 
+Renderer 객체로 그림 그리고, 
+이벤트와 Idle에서 화면 갱신하는 OpenGL 프로그램 구조”
 */
 
 #include "stdafx.h"
 #include <iostream>
-#include "Dependencies\glew.h"
-#include "Dependencies\freeglut.h"
+#include "Dependencies\glew.h"     // glew.h: OpenGL 확장 함수 사용
+#include "Dependencies\freeglut.h" // freeglut.h: 윈도우, 입력, 렌더링 루프 관리
 
 #include "Renderer.h"
 
@@ -19,14 +24,14 @@ Renderer *g_Renderer = NULL;
 
 void RenderScene(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
+	glClearColor(0.0f, 0.3f, 0.3f, 1.0f); // 배경색 설정 (0.0, 0.3, 0.3)
 
 	// Renderer Test
-	// g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
+	// g_Renderer->DrawSolidRect(0, 0, 0, 20, 1, 0, 1, 1);
 	g_Renderer->DrawTest();
 
-	glutSwapBuffers();
+	glutSwapBuffers(); // 더블 버퍼링 → 화면에 최종 출력
 }
 
 void Idle(void)
@@ -56,15 +61,18 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(500, 500);
-	glutCreateWindow("Game Software Engineering KPU");
+	glutCreateWindow("ShaderProgramming");
+	// FreeGLUT 초기화
+	// 디스플레이 모드 : 깊이 버퍼, 더블 버퍼, RGBA
+	// 윈도우 생성 : 500x500, 제목 지정
 
+	// GLEW 초기화 → OpenGL 확장 함수 사용 가능
+	// OpenGL 3.0 지원 여부 확인
 	glewInit();
-	if (glewIsSupported("GL_VERSION_3_0"))
-	{
+	if (glewIsSupported("GL_VERSION_3_0")) {
 		std::cout << " GLEW Version is 3.0\n ";
 	}
-	else
-	{
+	else {
 		std::cout << "GLEW 3.0 not supported\n ";
 	}
 
@@ -76,7 +84,10 @@ int main(int argc, char **argv)
 	}
 
 	glutDisplayFunc(RenderScene);
-	glutIdleFunc(Idle);
+
+	// 모든 입력 이벤트에서 화면 다시 그리기 호출
+	// Idle 상태에서도 계속 RenderScene() 실행 → 애니메이션 가능
+	glutIdleFunc(Idle); // Idle 함수: CPU가 놀 때 실행
 	glutKeyboardFunc(KeyInput);
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);

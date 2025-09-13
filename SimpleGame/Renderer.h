@@ -19,9 +19,11 @@ public:
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
+
+	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	bool ReadFile(char* filename, std::string *target);
 	void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
-	GLuint CompileShaders(char* filenameVS, char* filenameFS);
+	
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
 
