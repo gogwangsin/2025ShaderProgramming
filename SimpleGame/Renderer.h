@@ -36,11 +36,11 @@ private:
 	GLuint m_SolidRectShader = 0;
 
 	// lecture2, 3
-	GLuint m_VBOTestPos = 0;
-	// vertex 데이터인데 Position 위치 정보만 갖는
-
+	GLuint m_VBOTestPos = 0; // vertex 데이터인데 Position 위치 정보만 갖는
 	GLuint m_VBOTestColor = 0;
-
 	GLuint m_TestShader = 0;
+
+	// Time
+	float m_time = 0;
 };
 

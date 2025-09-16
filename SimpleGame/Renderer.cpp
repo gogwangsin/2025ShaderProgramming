@@ -262,8 +262,13 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 
 void Renderer::DrawTest()
 {
+	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
+
 	//Program select
 	glUseProgram(m_TestShader);
+
+	int uTimeLoc = glGetUniformLocation(m_TestShader, "u_Time");
+	glUniform1f(uTimeLoc, m_time);
 
 	// Location 포지션 받고, Enable하고, 바인드, 바인드되어 있는 포인터와 시작점을 받아오기
 	int aPosLoc = glGetAttribLocation(m_TestShader, "a_Position");
@@ -273,12 +278,12 @@ void Renderer::DrawTest()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
 	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 	// → 즉, "0번 슬롯(a_Position)은 이 VBO에서 vec3(float 3개) 형태로 읽어라" 라고 알려주는 거죠.
-	glDrawArrays(GL_TRIANGLES, 0, 6); // 정짐 개수만 늘어났다 3->6
+	// glDrawArrays(GL_TRIANGLES, 0, 6); 
 
 	glEnableVertexAttribArray(aColorLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestColor);
 	glVertexAttribPointer(aColorLoc, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_TRIANGLES, 0, 6); // 정짐 개수만 늘어났다 3->6
 
 	// 위 4가지 방법을 동일하게 하면 된다.
 	// ( glGetAttribLocation, glEnableVertexAttribArray, glBindBuffer, glVertexAttribPointer )
