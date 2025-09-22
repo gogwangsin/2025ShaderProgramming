@@ -16,6 +16,7 @@ public:
 	bool IsInitialized();
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTest();
+	void DrawParticle();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -26,6 +27,7 @@ private:
 	
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
+	void GenerateParticles(int numParticle);
 
 	bool m_Initialized = false;
 	
@@ -45,5 +47,7 @@ private:
 
 	// Particle
 	GLuint m_ParticleShader = 0;
+	GLuint m_VBOParticle = 0;
+	GLuint m_VBOParticleVertexCount = 0;
 };
 
