@@ -19,6 +19,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_TestShader = CompileShaders("./Shaders/Test.vs", "./Shaders/Test.fs");
+	m_ParticleShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -63,13 +64,19 @@ void Renderer::CreateVertexBufferObjects()
 	float testPos[]
 		=
 	{
-		(0.f - temp) * size, (0.f - temp) * size, 0.f,
-		(1.f - temp) * size, (0.f - temp) * size, 0.f,
-		(1.f - temp) * size, (1.f - temp) * size, 0.f, // triangle 1
+		(0.f - temp) * size, (0.f - temp) * size, 0.f, 0.5f,
+		(1.f - temp) * size, (0.f - temp) * size, 0.f, 0.5f,
+		(1.f - temp) * size, (1.f - temp) * size, 0.f, 0.5f,
+		(0.f - temp) * size, (0.f - temp) * size, 0.f, 0.5f,
+		(1.f - temp) * size, (1.f - temp) * size, 0.f, 0.5f,
+		(0.f - temp) * size, (1.f - temp) * size, 0.f, 0.5f, // Quad 1
 
-		(0.f - temp) * size, (0.f - temp) * size, 0.f,
-		(1.f - temp) * size, (1.f - temp) * size, 0.f,
-		(0.f - temp) * size, (1.f - temp) * size, 0.f // triangle 2
+		(0.f - temp)* size, (0.f - temp)* size, 0.f, 1.0f,
+		(1.f - temp)* size, (0.f - temp)* size, 0.f, 1.0f,
+		(1.f - temp)* size, (1.f - temp)* size, 0.f, 1.0f,
+		(0.f - temp)* size, (0.f - temp)* size, 0.f, 1.0f,
+		(1.f - temp)* size, (1.f - temp)* size, 0.f, 1.0f,
+		(0.f - temp)* size, (1.f - temp)* size, 0.f, 1.0f // Quad 2
 	};
 	// -> 반시계로
 
@@ -87,7 +94,13 @@ void Renderer::CreateVertexBufferObjects()
 		1.f, 0.f, 0.f, 1.f,
 		0.f, 1.f, 0.f, 1.f,
 		0.f, 0.f, 1.f, 1.f,    //Triangle1
+		1.f, 0.f, 0.f, 1.f,
+		0.f, 1.f, 0.f, 1.f,
+		0.f, 0.f, 1.f, 1.f,    //Triangle2
 
+		1.f, 0.f, 0.f, 1.f,
+		0.f, 1.f, 0.f, 1.f,
+		0.f, 0.f, 1.f, 1.f,    //Triangle1
 		1.f, 0.f, 0.f, 1.f,
 		0.f, 1.f, 0.f, 1.f,
 		0.f, 0.f, 1.f, 1.f    //Triangle2
@@ -272,18 +285,24 @@ void Renderer::DrawTest()
 
 	// Location 포지션 받고, Enable하고, 바인드, 바인드되어 있는 포인터와 시작점을 받아오기
 	int aPosLoc = glGetAttribLocation(m_TestShader, "a_Position");
+	int aRadiusLoc = glGetAttribLocation(m_TestShader, "a_Radius");
 	int aColorLoc = glGetAttribLocation(m_TestShader, "a_Color");
 
 	glEnableVertexAttribArray(aPosLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
-	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
 	// → 즉, "0번 슬롯(a_Position)은 이 VBO에서 vec3(float 3개) 형태로 읽어라" 라고 알려주는 거죠.
 	// glDrawArrays(GL_TRIANGLES, 0, 6); 
+
+	glEnableVertexAttribArray(aRadiusLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);
+	glVertexAttribPointer(aRadiusLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)(sizeof(float)*3));
 
 	glEnableVertexAttribArray(aColorLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestColor);
 	glVertexAttribPointer(aColorLoc, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 6); // 정짐 개수만 늘어났다 3->6
+	glDrawArrays(GL_TRIANGLES, 0, 12); 
+	// 버텍스 12개를 그리자
 
 	// 위 4가지 방법을 동일하게 하면 된다.
 	// ( glGetAttribLocation, glEnableVertexAttribArray, glBindBuffer, glVertexAttribPointer )

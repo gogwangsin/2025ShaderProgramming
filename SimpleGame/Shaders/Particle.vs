@@ -1,7 +1,6 @@
 #version 330
 
 in vec3 a_Position;
-in float a_Radius;
 in vec4 a_Color;
 
 out vec4 v_Color;
@@ -18,8 +17,11 @@ void main()
 	float y = sin(rad);
 	float x = cos(rad);
 
+	// float my_y = sin(u_Time * c_PI * 2);
+
 	vec4 newPosition = vec4(a_Position, 1);
-	newPosition.xy = newPosition.xy + vec2(x, y) * a_Radius;
+	// newPosition.xy = newPosition.xy - vec2(0.5);
+	newPosition.xy = newPosition.xy + vec2(x, y) * fract(u_Time / 2);
 	
 
 	gl_Position = newPosition;
