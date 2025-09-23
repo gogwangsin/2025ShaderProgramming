@@ -14,13 +14,15 @@ public:
 	~Renderer();
 
 	bool IsInitialized();
+	void ReloadAllShaderPrograms();
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTest();
 	void DrawParticle();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
-
+	void CompileAllShaderPrograms();
+	void DeleteAllShaderPrograms();
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	bool ReadFile(char* filename, std::string *target);
 	void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
@@ -28,6 +30,8 @@ private:
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
 	void GenerateParticles(int numParticle);
+
+	// Alt + '+' + Enter : 정의 만들기
 
 	bool m_Initialized = false;
 	

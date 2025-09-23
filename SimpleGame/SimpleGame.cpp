@@ -21,15 +21,22 @@ Renderer 객체로 그림 그리고,
 #include "Renderer.h"
 
 Renderer *g_Renderer = NULL;
+bool g_bNeedReloadShaderPrograms = false;
 
 void RenderScene(void)
 {
+	if (g_bNeedReloadShaderPrograms)
+	{
+		g_Renderer->ReloadAllShaderPrograms();
+		g_bNeedReloadShaderPrograms = false;
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f); // 배경색 설정 (0.0, 0.3, 0.3)
 
 	// Renderer Test
 	// g_Renderer->DrawSolidRect(0, 0, 0, 20, 1, 0, 1, 1);
-	//g_Renderer->DrawTest();
+	// g_Renderer->DrawTest();
 	g_Renderer->DrawParticle();
 
 	glutSwapBuffers(); // 더블 버퍼링 → 화면에 최종 출력
@@ -42,17 +49,26 @@ void Idle(void)
 
 void MouseInput(int button, int state, int x, int y)
 {
-	RenderScene();
 }
 
 void KeyInput(unsigned char key, int x, int y)
 {
-	RenderScene();
+	// 프로그램 실행중에 셰이더를 끄거나 켤 수 있도록
+	// -> 셰이더 파일만 수정 저장하고 키 입력하면 다시 그려진다
+	switch (key)
+	{
+	case '1':
+		g_bNeedReloadShaderPrograms = true;
+		break;
+
+
+	default:
+		break;
+	}
 }
 
 void SpecialKeyInput(int key, int x, int y)
 {
-	RenderScene();
 }
 
 int main(int argc, char **argv)
