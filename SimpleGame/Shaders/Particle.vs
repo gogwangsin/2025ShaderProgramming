@@ -4,6 +4,7 @@ in vec3 a_Position;
 in float a_Radius;
 in vec4 a_Color;
 in float a_STime;
+in vec3 a_Vel;
 
 out vec4 v_Color;
 
