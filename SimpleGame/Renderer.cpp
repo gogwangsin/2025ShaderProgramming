@@ -339,6 +339,8 @@ void Renderer::DrawTest()
 
 void Renderer::DrawParticle()
 {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
 	m_time += 0.00008; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
 
@@ -378,9 +380,12 @@ void Renderer::DrawParticle()
 
 	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount);
 //	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount - 6 * 4000);
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(aPosLoc);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glDisable(GL_BLEND);
 }
 
 void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
