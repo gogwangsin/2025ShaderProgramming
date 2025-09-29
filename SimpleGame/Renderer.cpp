@@ -23,7 +23,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create VBOs
 	CreateVertexBufferObjects();
 
-	GenerateParticles(5000);
+	GenerateParticles(10000);
 
 	if (m_SolidRectShader > 0 && m_VBORect > 0)
 	{
@@ -428,8 +428,8 @@ void Renderer::GenerateParticles(int numParticle)
 		float sTime = ((float)rand() / (float)RAND_MAX) * 2; // 0~2 사이
 		
 		float vx, vy, vz;
-		vx = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f; // -1~1
-		vy = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f; // -1~1
+		vx = (((float)rand() / (float)RAND_MAX) * 2.f - 1.f) * 1.5; // -1~1
+		vy = ((((float)rand() / (float)RAND_MAX) * 2.f - 1.f) + 1.5f) * 0.7; // -1~1
 		vz = 0;
 
 		int index = i * floatCountPerVertex * verticesCountPerParticle;
