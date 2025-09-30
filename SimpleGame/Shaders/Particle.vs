@@ -53,12 +53,15 @@ void raining()
 
 void sinParticle_0930()
 {
+	vec4 centerC = vec4(1,0,0,1);
+	vec4 borderC = vec4(1,1,1,0);
+	
 	//float newTime = fract(u_Time); // 0~1 와리가리
 	float newTime = u_Time - a_STime;
 	float lifeTime = a_LifeTime;
 	vec4 newPosition = vec4(a_Position, 1);
 	float newAlpha = 1.0;
-
+	vec4 newColor = a_Color;
 
 	if(newTime > 0 )
 	{
@@ -76,7 +79,10 @@ void sinParticle_0930()
 		// 시간이 지남에 따라 폭이 커진다		
 
 		newPosition.xy += vec2(x,y);
-		newAlpha = 2.0 - t / a_LifeTime; // 1 ~ 0 
+		newAlpha = 1.5 - t / a_LifeTime; // 1 ~ 0 
+		
+		newColor = 	mix(centerC, borderC, abs(y * 5)); 
+		// 보간 함수 -> built-in
 	}
 	else
 	{
@@ -84,7 +90,7 @@ void sinParticle_0930()
 	}
 
 	gl_Position = newPosition;
-	v_Color = vec4(a_Color.rgb, newAlpha);
+	v_Color = vec4(newColor.rgb, newAlpha);
 }
 
 void main()
