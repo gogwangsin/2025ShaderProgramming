@@ -2,7 +2,7 @@
 
 // attribute로 in으로 받는거 -> Per Vertex Data
 in vec3 a_Position;
-in float a_Radius;
+in float a_Value;
 in vec4 a_Color;
 in float a_STime;
 in vec3 a_Vel;
@@ -54,20 +54,26 @@ void sinParticle_0930()
 {
 	//float newTime = fract(u_Time); // 0~1 와리가리
 	float newTime = u_Time - a_STime;
+	float lifeTime = a_LifeTime;
 	vec4 newPosition = vec4(a_Position, 1);
 	float newAlpha = 1.0;
 
 
 	if(newTime > 0 )
 	{
-		float t = fract(newTime);
+		float rep = 4; // Sin 함수 주기 
+
+		float t = fract(newTime / lifeTime) * lifeTime;
 		float tt = t*t;
 
+		float value = ((a_Value - 0.5) * 2); // -1 ~ 1
+
 		float x = 2 * t - 1;
-		float y = sin(t * 2 * c_PI); // 라디안으로 만들어준다 
+		float y = t * sin(t * 2 * c_PI * rep) * value; // 라디안으로 만들어준다 
+		// 시간이 지남에 따라 폭이 커진다
 
 		newPosition.xy += vec2(x,y);
-		newAlpha = 1.0 - t / a_LifeTime; // 1 ~ 0 
+		newAlpha = 1.5 - t / a_LifeTime; // 1 ~ 0 
 	}
 	else
 	{
