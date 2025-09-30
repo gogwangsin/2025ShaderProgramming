@@ -93,9 +93,41 @@ void sinParticle_0930()
 	v_Color = vec4(newColor.rgb, newAlpha);
 }
 
+void circleParticle_0930()
+{
+	float newTime = u_Time - a_STime;
+	float lifeTime = a_LifeTime;
+	float newAlpha = 1.0;
+	vec4 newPosition = vec4(a_Position, 1);
+	
+	if( newTime > 0 )
+	{
+		float t = fract(newTime / lifeTime) * lifeTime;
+		float tt = t * t;
+
+		float x = sin(a_Value * 2 * c_PI);
+		float y = cos(a_Value * 2 * c_PI);
+		// 태어난 위치 s_0
+
+		float newX = x + 0.5 * tt * c_G.x;
+		float newY = y + 0.5 * tt * c_G.y;
+
+		newPosition.xy += vec2(newX,newY); 
+
+		newAlpha = 1.0 - t / a_LifeTime; // 1 ~ 0 
+	}
+	else
+	{
+		newPosition.xy = vec2(-100000, 0);		
+	}
+
+	gl_Position = newPosition;
+	v_Color = vec4(a_Color.rgb, newAlpha);
+}
+
 void main()
 {
 	// raining();
-
-	sinParticle_0930();
+	// sinParticle_0930();
+	circleParticle_0930();
 }
