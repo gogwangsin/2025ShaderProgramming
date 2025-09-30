@@ -70,11 +70,13 @@ void sinParticle_0930()
 		float value = ((a_Value - 0.5) * 2); // -1 ~ 1
 
 		float x = 2 * t - 1;
-		float y = t * sin(t * 2 * c_PI * period) * value; // 라디안으로 만들어준다 
-		// 시간이 지남에 따라 폭이 커진다
+		float y = t * sin(t * 2 * c_PI * period) * value; 
+		y *= sin(fract(newTime / lifeTime) * c_PI);
+		// 라디안으로 만들어준다 
+		// 시간이 지남에 따라 폭이 커진다		
 
 		newPosition.xy += vec2(x,y);
-		newAlpha = 1.5 - t / a_LifeTime; // 1 ~ 0 
+		newAlpha = 2.0 - t / a_LifeTime; // 1 ~ 0 
 	}
 	else
 	{
