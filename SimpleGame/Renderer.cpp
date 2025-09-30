@@ -359,8 +359,9 @@ void Renderer::DrawParticle()
 	int aVelLoc = glGetAttribLocation(shader, "a_Vel");
 	int aLifeTimeLoc = glGetAttribLocation(shader, "a_LifeTime");
 	int aMassLoc = glGetAttribLocation(shader, "a_Mass");
+	int aPeriodLoc = glGetAttribLocation(shader, "a_Period");
 
-	int stride = 14;
+	int stride = 15;
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);
 
 	glEnableVertexAttribArray(aPosLoc);
@@ -370,6 +371,7 @@ void Renderer::DrawParticle()
 	glEnableVertexAttribArray(aVelLoc);
 	glEnableVertexAttribArray(aLifeTimeLoc);
 	glEnableVertexAttribArray(aMassLoc);
+	glEnableVertexAttribArray(aPeriodLoc);
 
 	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
 	glVertexAttribPointer(aValueLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 3));
@@ -378,6 +380,7 @@ void Renderer::DrawParticle()
 	glVertexAttribPointer(aVelLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 9));
 	glVertexAttribPointer(aLifeTimeLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 12)); // 9->10이 아니고 9 + 3해서 12
 	glVertexAttribPointer(aMassLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 13)); 
+	glVertexAttribPointer(aPeriodLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 14));
 
 
 	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount);
@@ -405,8 +408,8 @@ void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 void Renderer::GenerateParticles(int numParticle)
 {
 	int floatCountPerVertex = 
-		3 + 1 + 4 + 1 + 3 + 1 + 1; 
-	// 좌표3, 값1, 색4 - x, y, z, value, r, g, b, a, sTime, vx, vy, vz, lifeTime, mass
+		3 + 1 + 4 + 1 + 3 + 1 + 1 + 1; 
+	// 좌표3, 값1, 색4 - x, y, z, value, r, g, b, a, sTime, vx, vy, vz, lifeTime, mass, period
 	int verticesCountPerParticle = 6;
 	int floatCountPerParticle = floatCountPerVertex * verticesCountPerParticle;
 	int totalVerticesCount = numParticle * verticesCountPerParticle;
@@ -438,6 +441,7 @@ void Renderer::GenerateParticles(int numParticle)
 
 		float lifetime = ((float)rand() / (float)RAND_MAX); // 0 ~ 1
 		float mass= ((float)rand() / (float)RAND_MAX) + 1.f; // 1 ~ 2
+		float period = ((float)rand() / (float)RAND_MAX) + 1.f; // 1 ~ 2
 
 		int index = i * floatCountPerVertex * verticesCountPerParticle;
 
@@ -455,6 +459,7 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = vz; index++;
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
+		vertices[index] = period; index++;
 
 		vertices[index] = x + size; index++; // v2
 		vertices[index] = y + size; index++;
@@ -470,6 +475,7 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = vz; index++;
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
+		vertices[index] = period; index++;
 
 		vertices[index] = x - size; index++; // v3
 		vertices[index] = y + size; index++;
@@ -485,6 +491,7 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = vz; index++;
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
+		vertices[index] = period; index++;
 
 		vertices[index] = x - size; index++; // v4
 		vertices[index] = y - size; index++;
@@ -500,6 +507,7 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = vz; index++;
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
+		vertices[index] = period; index++;
 
 		vertices[index] = x + size; index++; // v5
 		vertices[index] = y - size; index++;
@@ -515,6 +523,7 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = vz; index++;
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
+		vertices[index] = period; index++;
 
 		vertices[index] = x + size; index++; // v6
 		vertices[index] = y + size; index++;
@@ -530,6 +539,7 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = vz; index++;
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
+		vertices[index] = period; index++;
 	}
 
 	glGenBuffers(1, &m_VBOParticle);
