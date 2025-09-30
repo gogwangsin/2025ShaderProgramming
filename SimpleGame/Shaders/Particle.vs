@@ -18,7 +18,7 @@ uniform vec3 u_Force;
 const float c_PI = 3.141592;
 const vec2 c_G = vec2(0, -9.8);
 
-void main()
+void raining()
 {
 	float newAlpha = 1.0;
 	vec4 newPosition = vec4(a_Position, 1);
@@ -46,7 +46,41 @@ void main()
 	}
 
 	gl_Position = newPosition;
- 
 
 	v_Color = vec4(a_Color.rgb, newAlpha);
+}
+
+void sinParticle_0930()
+{
+	//float newTime = fract(u_Time); // 0~1 와리가리
+	float newTime = u_Time - a_STime;
+	vec4 newPosition = vec4(a_Position, 1);
+	float newAlpha = 1.0;
+
+
+	if(newTime > 0 )
+	{
+		float t = fract(newTime);
+		float tt = t*t;
+
+		float x = 2 * t - 1;
+		float y = sin(t * 2 * c_PI); // 라디안으로 만들어준다 
+
+		newPosition.xy += vec2(x,y);
+		newAlpha = 1.0 - t / a_LifeTime; // 1 ~ 0 
+	}
+	else
+	{
+		newPosition.xy = vec2(-100000, 0);		
+	}
+
+	gl_Position = newPosition;
+	v_Color = vec4(a_Color.rgb, newAlpha);
+}
+
+void main()
+{
+	// raining();
+
+	sinParticle_0930();
 }

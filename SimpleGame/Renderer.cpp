@@ -416,8 +416,8 @@ void Renderer::GenerateParticles(int numParticle)
 
 	for (int i = 0; i < numParticle; ++i) {
 		float x, y, z, value, r, g, b, a;
-		x = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f; // -1~1
-		y = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f; // -1~1
+		x = 0; // ((float)rand() / (float)RAND_MAX) * 2.f - 1.f; // -1~1
+		y = 0; // ((float)rand() / (float)RAND_MAX) * 2.f - 1.f; // -1~1
 		z = 0.f;
 
 		value = (float)rand() / (float)RAND_MAX;
