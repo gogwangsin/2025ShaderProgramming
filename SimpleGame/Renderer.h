@@ -18,6 +18,7 @@ public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTest();
 	void DrawParticle();
+	void DrawGridMesh();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -30,6 +31,7 @@ private:
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
 	void GenerateParticles(int numParticle);
+	void CreateGridMesh(int x, int y);
 
 	// Alt + '+' + Enter : 정의 만들기
 
@@ -53,5 +55,10 @@ private:
 	GLuint m_ParticleShader = 0;
 	GLuint m_VBOParticle = 0;
 	GLuint m_VBOParticleVertexCount = 0;
+
+	// Grid Mesh
+	GLuint m_GridMeshShader = 0;
+	GLuint m_GridMeshVertexCount = 0;
+	GLuint m_GridMeshVBO = 0;
 };
 
