@@ -172,9 +172,9 @@
   <ItemGroup>
     <None Include="Shaders\GridMesh.frag" />
     <None Include="Shaders\GridMesh.vs" />
-    <None Include="Shaders\Particle.fs" />
+    <None Include="Shaders\Particle.frag" />
     <None Include="Shaders\Particle.vs" />
-    <None Include="Shaders\SolidRect.fs" />
+    <None Include="Shaders\SolidRect.frag" />
     <None Include="Shaders\SolidRect.vs" />
     <None Include="Shaders\Test.fs" />
     <None Include="Shaders\Test.vs" />
