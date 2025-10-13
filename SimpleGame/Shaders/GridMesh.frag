@@ -6,6 +6,8 @@ in vec4 v_Color;
 
 void main()
 {
+	float thi;
+
 	FragColor = v_Color;
 
 }

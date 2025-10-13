@@ -37,10 +37,11 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 void Renderer::CompileAllShaderPrograms()
 {
 	//Load shaders
-	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
+	// +) GLSL Language Integration 자체 버그로 .frag가 충돌나서 편집 안될 때가 있음 -> .fs 쓰거나 .glsl로 하기
+	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.frag");
 	m_TestShader = CompileShaders("./Shaders/Test.vs", "./Shaders/Test.fs");
-	m_ParticleShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
-	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.fs");
+	m_ParticleShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.frag");
+	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.frag");
 }
 
 void Renderer::DeleteAllShaderPrograms()
