@@ -11,15 +11,17 @@ const float c_PI = 3.141592;
 void main()
 {
 	// a_Position.x => -0.5 ~ +0.5
-
 	vec4 newPosition = vec4(a_Position, 1);	
 
 	float value = a_Position.x + 0.5; // 0 ~ 1
 
+	newPosition.y = newPosition.y * (1-value); // value가 1일 때 y가 0이 된다.
+
 	float deltaX = 0; // sin(2 * value * c_PI);	
-	float deltaY = sin(2 * value * c_PI + u_Time); // 더하면 된다.	
+	float deltaY = value * 0.5 * sin(2 * value * c_PI + (u_Time * 20));	
 
 	newPosition += vec4(deltaX, deltaY, 0, 0);
+
 
 	gl_Position = newPosition;
 
