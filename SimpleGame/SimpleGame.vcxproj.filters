@@ -61,10 +61,16 @@
     <None Include="Shaders\Particle.vs">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\GridMesh.frag">
+    <None Include="Shaders\GridMesh.glsl">
       <Filter>소스 파일\Shaders</Filter>
     </None>
     <None Include="Shaders\GridMesh.vs">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\FullScreen.glsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\FullScreen.vs">
       <Filter>소스 파일\Shaders</Filter>
     </None>
   </ItemGroup>

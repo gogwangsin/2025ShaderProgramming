@@ -41,7 +41,8 @@ void Renderer::CompileAllShaderPrograms()
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.frag");
 	m_TestShader = CompileShaders("./Shaders/Test.vs", "./Shaders/Test.fs");
 	m_ParticleShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.frag");
-	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.frag");
+	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.glsl");
+	m_FullScreenShader = CompileShaders("./Shaders/FullScreen.vs", "./Shaders/FullScreen.glsl");
 }
 
 void Renderer::DeleteAllShaderPrograms()
@@ -50,6 +51,7 @@ void Renderer::DeleteAllShaderPrograms()
 	glDeleteShader(m_TestShader);
 	glDeleteShader(m_ParticleShader);
 	glDeleteShader(m_GridMeshShader);
+	glDeleteShader(m_FullScreenShader);
 }
 
 bool Renderer::IsInitialized()
@@ -65,6 +67,7 @@ void Renderer::ReloadAllShaderPrograms()
 
 void Renderer::CreateVertexBufferObjects()
 {
+	//----------------------------------------------------------------
 	// 사각형(Rectangle) 정점 데이터를 GPU에 올리는 과정
 	// 좌표를 m_WindowSizeX, m_WindowSizeY로 나눠서 픽셀 단위 → NDC 비율로 변환
 	float rect[] 
@@ -84,8 +87,10 @@ void Renderer::CreateVertexBufferObjects()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
 	// sizeof(rect) → 배열 크기(Byte), rect → 실제 데이터 포인터, GL_STATIC_DRAW → 데이터는 자주 안 바뀜 힌트
 	//	GPU 메모리에 정점 데이터를 복사
+	//----------------------------------------------------------------
 
 
+	//----------------------------------------------------------------
 	// lecture2
 	float temp = 0.5f;
 	float size = 0.1f;
@@ -113,7 +118,10 @@ void Renderer::CreateVertexBufferObjects()
 	// 아낌없이 쓰도록 하자
 	glBufferData(GL_ARRAY_BUFFER, sizeof(testPos), testPos, GL_STATIC_DRAW);
 	// GPU에 데이터를 올려주는 작업
+	//----------------------------------------------------------------
 
+
+	//----------------------------------------------------------------
 	// lecture3
 
 	float testColor[]
@@ -138,6 +146,27 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBOTestColor);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestColor);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(testColor), testColor, GL_STATIC_DRAW);
+	//----------------------------------------------------------------
+
+	//----------------------------------------------------------------
+	float fullRect[]
+		=
+	{
+		-1.f, -1.f, 0.f,
+		-1.f,  1.f, 0.f,
+		 1.f,  1.f, 0.f, //Triangle1
+
+		-1.f, -1.f, 0.f,
+		 1.f,  1.f, 0.f,
+		 1.f ,-1.f, 0.f, //Triangle2
+	};
+
+	glGenBuffers(1, &m_VBOFullScreen);				
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFullScreen);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRect), fullRect, GL_STATIC_DRAW);
+	//----------------------------------------------------------------
+
+
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -276,6 +305,18 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	return ShaderProgram;
 }
 
+void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
+{
+	// 윈도우 좌표를 OpenGL NDC 좌표로 변환하는 역할
+	// x, y : 윈도우(픽셀) 좌표, 예: (0 ~ m_WindowSizeX, 0 ~ m_WindowSizeY)
+	// 
+	// OpenGL **NDC(Normalized Device Coordinates)**는 좌표 범위가 [-1, 1]
+	// 하지만 이 함수는 단순히 0~2 범위로 매핑
+
+	*newX = x * 2.f / m_WindowSizeX;
+	*newY = y * 2.f / m_WindowSizeY;
+}
+
 void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
 {
 	float newX, newY;
@@ -343,6 +384,8 @@ void Renderer::DrawTest()
 	// 다른 숫자 = glGenFramebuffers로 만든 Frame Buffer Object
 }
 
+// ------------------------------------------------------------------------------------
+
 void Renderer::DrawParticle()
 {
 	glEnable(GL_BLEND);
@@ -398,18 +441,6 @@ void Renderer::DrawParticle()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glDisable(GL_BLEND);
-}
-
-void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
-{
-	// 윈도우 좌표를 OpenGL NDC 좌표로 변환하는 역할
-	// x, y : 윈도우(픽셀) 좌표, 예: (0 ~ m_WindowSizeX, 0 ~ m_WindowSizeY)
-	// 
-	// OpenGL **NDC(Normalized Device Coordinates)**는 좌표 범위가 [-1, 1]
-	// 하지만 이 함수는 단순히 0~2 범위로 매핑
-
-	*newX = x * 2.f / m_WindowSizeX;
-	*newY = y * 2.f / m_WindowSizeY;
 }
 
 void Renderer::GenerateParticles(int numParticle)
@@ -579,8 +610,8 @@ void Renderer::DrawGridMesh()
 	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO); 
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); 
 
-//	glDrawArrays(GL_TRIANGLES, 0, m_GridMeshVertexCount);
-	glDrawArrays(GL_LINE_STRIP, 0, m_GridMeshVertexCount);
+	glDrawArrays(GL_TRIANGLES, 0, m_GridMeshVertexCount);
+//	glDrawArrays(GL_LINE_STRIP, 0, m_GridMeshVertexCount);
 
 	glDisableVertexAttribArray(attribPosition); 
 
@@ -701,4 +732,32 @@ void Renderer::CreateGridMesh(int x, int y)
 
 	delete[] point;
 	delete[] vertices;
+}
+
+// ------------------------------------------------------------------------------------
+
+void Renderer::DrawFullScreenColor(float r, float g, float b, float a)
+{
+	int shader = m_FullScreenShader;
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//Program select
+	glUseProgram(shader);
+
+	glUniform4f(glGetUniformLocation(shader, "u_Color"), r, g, b, a);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position"); 
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFullScreen); 
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); 
+
+	glDrawArrays(GL_TRIANGLES, 0, 6); 
+
+	glDisableVertexAttribArray(attribPosition); 
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+
+	glDisable(GL_BLEND);
+
 }

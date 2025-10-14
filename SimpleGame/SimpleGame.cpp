@@ -31,13 +31,14 @@ void RenderScene(void)
 		g_bNeedReloadShaderPrograms = false;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // 배경색 설정 (0.0, 0.3, 0.3)
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
+	g_Renderer->DrawFullScreenColor(0, 0, 0, 0.1);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // 배경색 설정 (0.0, 0.3, 0.3)
 
 	// Renderer Test
 	// g_Renderer->DrawSolidRect(0, 0, 0, 20, 1, 0, 1, 1);
 	// g_Renderer->DrawTest();
-	//g_Renderer->DrawParticle();
+	// g_Renderer->DrawParticle();
 	g_Renderer->DrawGridMesh();
 
 	glutSwapBuffers(); // 더블 버퍼링 → 화면에 최종 출력
@@ -74,11 +75,14 @@ void SpecialKeyInput(int key, int x, int y)
 
 int main(int argc, char **argv)
 {
+	int winX = 800;
+	int winY = 800;
+
 	// Initialize GL things
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(winX, winY);
 	glutCreateWindow("ShaderProgramming");
 	// FreeGLUT 초기화
 	// 디스플레이 모드 : 깊이 버퍼, 더블 버퍼, RGBA
@@ -95,7 +99,7 @@ int main(int argc, char **argv)
 	}
 
 	// Initialize Renderer
-	g_Renderer = new Renderer(500, 500);
+	g_Renderer = new Renderer(winX, winY);
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";

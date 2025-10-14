@@ -18,7 +18,7 @@ void main()
 	newPosition.y = newPosition.y * (1-value); // value가 1일 때 y가 0이 된다.
 
 	float deltaX = 0; // sin(2 * value * c_PI);	
-	float deltaY = value * 0.5 * sin(2 * value * c_PI - (u_Time * 30));	
+	float deltaY = value * 0.5 * sin(2 * value * c_PI - (u_Time * 80));	
 	float newColor = (sin(2 * value * c_PI - (u_Time * 20)) + 2 ) / 2;	
 
 	newPosition += vec4(deltaX, deltaY, 0, 0);
@@ -26,4 +26,5 @@ void main()
 	gl_Position = newPosition;
 
 	v_Color = vec4(newColor);
+//	v_Color = vec4(newColor, newColor, newColor, 0.6);
 }
