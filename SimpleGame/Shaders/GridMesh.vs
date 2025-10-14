@@ -38,9 +38,10 @@ void Wave()
 	vec2 pos = vec2(a_Position.xy);
 	vec2 center = vec2(0,0);
 	float dis = distance(pos, center); // 거리가 가까울 수록 0에 가깝다 -> 색을 칠하면 바깥으로 갈 수록 밝아질 것 
-	
+	float v = 2 * clamp(0.5 - dis, 0, 1);
+
 	// 0 ~ 1
-	float newColor = sin(dis * 4 * c_PI * 10 - u_Time * 30); // 0 ~ 2PI
+	float newColor = v * sin(dis * 4 * c_PI * 10 - u_Time * 30); // 0 ~ 2PI
 
 
 	newPosition += vec4(dX, dY, 0, 0);	
