@@ -8,7 +8,7 @@ uniform float u_Time;
 
 const float c_PI = 3.141592;
 
-void main()
+void Flag()
 {
 	// a_Position.x => -0.5 ~ +0.5
 	vec4 newPosition = vec4(a_Position, 1);	
@@ -26,5 +26,51 @@ void main()
 	gl_Position = newPosition;
 
 	v_Color = vec4(newColor);
-//	v_Color = vec4(newColor, newColor, newColor, 0.6);
 }
+
+void Wave()
+{
+	vec4 newPosition = vec4(a_Position, 1);	
+
+	float dX = 0;
+	float dY = 0;
+	
+	vec2 pos = vec2(a_Position.xy);
+	vec2 center = vec2(0,0);
+	float dis = distance(pos, center); // 거리가 가까울 수록 0에 가깝다 -> 색을 칠하면 바깥으로 갈 수록 밝아질 것 
+	
+	// 0 ~ 1
+	float newColor = sin(dis * 4 * c_PI * 10 - u_Time * 30); // 0 ~ 2PI
+
+
+	newPosition += vec4(dX, dY, 0, 0);	
+	gl_Position = newPosition;
+	
+
+	v_Color = vec4(newColor);
+}
+
+void main()
+{
+	// Flag();
+	Wave();
+}
+
+	/*
+	# 원 그리는 방법 
+	# 방법 1.
+	if(dis < 0.5)
+	{
+		newColor = 1;
+	}
+	else
+	{
+		newColor = 0;
+	}
+	*/
+	/*
+	// # 2. 방법
+	float value = 0.5 - dis;
+	value = clamp(value, 0, 1); // 음수인 부분 없애는
+	value = ceil(value); // 올림 함수
+	*/
