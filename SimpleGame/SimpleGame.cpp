@@ -31,15 +31,15 @@ void RenderScene(void)
 		g_bNeedReloadShaderPrograms = false;
 	}
 
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
-	g_Renderer->DrawFullScreenColor(0, 0, 0, 0.04);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
+	// g_Renderer->DrawFullScreenColor(0, 0, 0, 0.04);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // 배경색 설정 (0.0, 0.3, 0.3)
 
 	// Renderer Test
 	// g_Renderer->DrawSolidRect(0, 0, 0, 20, 1, 0, 1, 1);
-	// g_Renderer->DrawTest();
+	g_Renderer->DrawTest();
 	// g_Renderer->DrawParticle();
-	g_Renderer->DrawGridMesh();
+	// g_Renderer->DrawGridMesh();
 
 	glutSwapBuffers(); // 더블 버퍼링 → 화면에 최종 출력
 }
