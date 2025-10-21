@@ -15,6 +15,7 @@ public:
 
 	bool IsInitialized();
 	void ReloadAllShaderPrograms();
+
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTest();
 	void DrawParticle();
@@ -29,13 +30,15 @@ private:
 	bool ReadFile(char* filename, std::string *target);
 	void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
 	
-	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
+	
+	void CreateVertexBufferObjects();
 	void GenerateParticles(int numParticle);
 	void CreateGridMesh(int x, int y);
 
 	// Alt + '+' + Enter : 정의 만들기
 
+private:
 	bool m_Initialized = false;
 	
 	unsigned int m_WindowSizeX = 0;

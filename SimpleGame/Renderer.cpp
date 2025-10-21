@@ -23,7 +23,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	CreateVertexBufferObjects();
 
 	// Create Grid Mesh => (2,2) 포인트의 개수이다 -> 사각형 개수 -> 삼각형 개수
-	CreateGridMesh(100, 100); 
+	CreateGridMesh(200, 200); 
 
 	// Create Particles
 	GenerateParticles(5000);
@@ -620,10 +620,11 @@ void Renderer::DrawGridMesh()
 
 void Renderer::CreateGridMesh(int x, int y)
 {
-	float basePosX = -0.5f;
-	float basePosY = -0.5f;
-	float targetPosX = 0.5f;
-	float targetPosY = 0.5f;
+	// 화면 꽉채우게
+	float basePosX = -1.f;
+	float basePosY = -1.f;
+	float targetPosX = 1.f;
+	float targetPosY = 1.f;
 
 	int pointCountX = x;
 	int pointCountY = y;
