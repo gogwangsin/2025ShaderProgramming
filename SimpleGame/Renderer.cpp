@@ -84,6 +84,7 @@ void Renderer::CreateVertexBufferObjects()
 	//----------------------------------------------------------------
 	// 사각형(Rectangle) 정점 데이터를 GPU에 올리는 과정
 	// 좌표를 m_WindowSizeX, m_WindowSizeY로 나눠서 픽셀 단위 → NDC 비율로 변환
+	// 해상도와 관계없이, 화면 중앙 근처에 "픽셀 단위로 작게 보이는 정사각형"을 그리기 위한 정점 데이터 -> 실제 화면에서 약 2픽셀 × 2픽셀짜리 정사각형
 	float rect[] 
 		=
 	{
