@@ -595,7 +595,7 @@ void Renderer::GenerateParticles(int numParticle)
 
 void Renderer::DrawGridMesh()
 {
-	m_time += 0.00008; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
+	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
 
 
 	//Program select
