@@ -1,13 +1,15 @@
 #version 330
+#define MAX_POINTS 3
 
 in vec3 a_Position;
 
 out vec4 v_Color;
 
 uniform float u_Time;
+uniform vec4 u_Points[MAX_POINTS];
 
 const float c_PI = 3.141592;
-const vec4 c_Points[3] = vec4[](vec4(0, 0, 3, 0.8), vec4(0.7, -0.1, 2, 1.5), vec4(-0.5, 0.3, 1, 1));
+const vec4 c_Points[MAX_POINTS] = vec4[](vec4(0, 0, 3, 0.8), vec4(0.7, -0.1, 2, 1.5), vec4(-0.5, 0.3, 1, 1));
 
 void Flag()
 {
@@ -63,10 +65,10 @@ void RainDrop()
 	float newColor = 0;
 	
 
-	for(int i = 0; i < 3; ++i)
+	for(int i = 0; i < MAX_POINTS; ++i)
 	{
-		float startTime = c_Points[i].z;
-		float lifeTime = c_Points[i].w;
+		float startTime = u_Points[i].z;
+		float lifeTime = u_Points[i].w;
 		float newTime = u_Time - startTime;
 
 		if( newTime > 0 )
@@ -76,7 +78,7 @@ void RainDrop()
 
 			float t = newTime * lifeTime;
 			float range = baseTime * lifeTime / 3;
-			vec2 center = c_Points[i].xy;
+			vec2 center = u_Points[i].xy;
 			float dis = distance(pos, center); // 거리가 가까울 수록 0에 가깝다 -> 색을 칠하면 바깥으로 갈 수록 밝아질 것 
 
 			float v = 20 * clamp(range - dis, 0, 1); // 2*(0~1) 

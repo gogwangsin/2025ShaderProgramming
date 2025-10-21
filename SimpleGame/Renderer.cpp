@@ -597,6 +597,11 @@ void Renderer::DrawGridMesh()
 {
 	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
 
+	float points[] = {
+		 0, 0, 2, 2,
+		 0.5, 0, 3, 3,
+		-0.5, 0, 4, 4
+	};
 
 	//Program select
 	int shader = m_GridMeshShader;
@@ -604,6 +609,11 @@ void Renderer::DrawGridMesh()
 
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
+
+	int uPoitnsLoc = glGetUniformLocation(shader, "u_Points");
+	glUniform4fv(uPoitnsLoc, 3, points); 
+	// array로 전달할 땐 마지막에 v
+	// 3은 “보낼 벡터(vec4)의 개수(count)” -> 4개씩 잘라서(vec4) 3묶음으로 uniform 배열에 자동으로 매핑
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
