@@ -70,6 +70,6 @@ private:
 	GLuint m_FullScreenShader = 0;
 
 	// For RainDrop Effect
-	float m_Points[40 * 4]; // 100개의 점 만들 것
+	float m_Points[20 * 4]; // 100개의 점 만들 것
 };
 

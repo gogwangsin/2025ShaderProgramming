@@ -1,5 +1,5 @@
 #version 330
-#define MAX_POINTS 40
+#define MAX_POINTS 20
 
 in vec3 a_Position;
 

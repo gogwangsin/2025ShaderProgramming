@@ -30,12 +30,12 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	// Fill Points
 	int index = 0;
-	for (int i = 0; i < 40; ++i)
+	for (int i = 0; i < 20; ++i)
 	{
 		float x = 2 *((float)rand() / RAND_MAX) - 1;
 		float y = 2 * ((float)rand() / RAND_MAX) - 1;
 		float startTime = ((float)rand() / RAND_MAX);
-		float lifeTime = ((float)rand() / RAND_MAX) - 1;
+		float lifeTime = ((float)rand() / RAND_MAX);
 		m_Points[index] = x; index++;
 		m_Points[index] = y; index++;
 		m_Points[index] = startTime; index++;
@@ -619,7 +619,7 @@ void Renderer::DrawGridMesh()
 	glUniform1f(uTimeLoc, m_time);
 
 	int uPoitnsLoc = glGetUniformLocation(shader, "u_Points");
-	glUniform4fv(uPoitnsLoc, 40, m_Points); 
+	glUniform4fv(uPoitnsLoc, 20, m_Points); 
 	// array로 전달할 땐 마지막에 v
 	// 3은 “보낼 벡터(vec4)의 개수(count)” -> 4개씩 잘라서(vec4) 3묶음으로 uniform 배열에 자동으로 매핑
 
