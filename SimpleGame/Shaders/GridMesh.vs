@@ -1,5 +1,5 @@
 #version 330
-#define MAX_POINTS 3
+#define MAX_POINTS 40
 
 in vec3 a_Position;
 
@@ -9,7 +9,7 @@ uniform float u_Time;
 uniform vec4 u_Points[MAX_POINTS];
 
 const float c_PI = 3.141592;
-const vec4 c_Points[MAX_POINTS] = vec4[](vec4(0, 0, 3, 0.8), vec4(0.7, -0.1, 2, 1.5), vec4(-0.5, 0.3, 1, 1));
+//const vec4 c_Points[MAX_POINTS] = vec4[](vec4(0, 0, 3, 0.8), vec4(0.7, -0.1, 2, 1.5), vec4(-0.5, 0.3, 1, 1));
 
 void Flag()
 {
@@ -81,8 +81,8 @@ void RainDrop()
 			vec2 center = u_Points[i].xy;
 			float dis = distance(pos, center); // 거리가 가까울 수록 0에 가깝다 -> 색을 칠하면 바깥으로 갈 수록 밝아질 것 
 
-			float v = 20 * clamp(range - dis, 0, 1); // 2*(0~1) 
-			newColor += oneMinus * v * sin(dis * 4 * c_PI * 10 - t * 20); // 0 ~ 2PI
+			float v = 30 * clamp(range - dis, 0, 1); // 2*(0~1) 
+			newColor += oneMinus * v * sin(dis * 4 * c_PI * 10 - t * 30); // 0 ~ 2PI
 		}
 
 	}

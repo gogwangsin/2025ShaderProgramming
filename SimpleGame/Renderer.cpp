@@ -28,6 +28,20 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	// Create Particles
 	GenerateParticles(5000);
 
+	// Fill Points
+	int index = 0;
+	for (int i = 0; i < 40; ++i)
+	{
+		float x = 2 *((float)rand() / RAND_MAX) - 1;
+		float y = 2 * ((float)rand() / RAND_MAX) - 1;
+		float startTime = ((float)rand() / RAND_MAX);
+		float lifeTime = ((float)rand() / RAND_MAX) - 1;
+		m_Points[index] = x; index++;
+		m_Points[index] = y; index++;
+		m_Points[index] = startTime; index++;
+		m_Points[index] = lifeTime; index++;
+	}
+
 	if (m_SolidRectShader > 0 && m_VBORect > 0)
 	{
 		m_Initialized = true;
@@ -595,13 +609,7 @@ void Renderer::GenerateParticles(int numParticle)
 
 void Renderer::DrawGridMesh()
 {
-	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
-
-	float points[] = {
-		 0, 0, 2, 2,
-		 0.5, 0, 3, 3,
-		-0.5, 0, 4, 4
-	};
+	m_time += 0.00032; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
 
 	//Program select
 	int shader = m_GridMeshShader;
@@ -611,7 +619,7 @@ void Renderer::DrawGridMesh()
 	glUniform1f(uTimeLoc, m_time);
 
 	int uPoitnsLoc = glGetUniformLocation(shader, "u_Points");
-	glUniform4fv(uPoitnsLoc, 3, points); 
+	glUniform4fv(uPoitnsLoc, 40, m_Points); 
 	// array로 전달할 땐 마지막에 v
 	// 3은 “보낼 벡터(vec4)의 개수(count)” -> 4개씩 잘라서(vec4) 3묶음으로 uniform 배열에 자동으로 매핑
 

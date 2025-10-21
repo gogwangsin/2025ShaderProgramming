@@ -69,5 +69,7 @@ private:
 	GLuint m_VBOFullScreen = 0;	
 	GLuint m_FullScreenShader = 0;
 
+	// For RainDrop Effect
+	float m_Points[40 * 4]; // 100개의 점 만들 것
 };
 
