@@ -11,6 +11,8 @@ but WITHOUT ANY WARRANTY.
 “FreeGLUT + GLEW로 윈도우 만들고, 
 Renderer 객체로 그림 그리고, 
 이벤트와 Idle에서 화면 갱신하는 OpenGL 프로그램 구조”
+
+Shader Fighting!
 */
 
 #include "stdafx.h"
