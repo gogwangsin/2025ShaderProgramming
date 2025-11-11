@@ -807,9 +807,13 @@ void Renderer::DrawFullScreenColor(float r, float g, float b, float a)
 void Renderer::DrawFS()
 {
 	int shader = m_FSShader;
-
 	//Program select
 	glUseProgram(shader);
+
+	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
+
+	int uTimeLoc = glGetUniformLocation(m_TestShader, "u_Time");
+	glUniform1f(uTimeLoc, m_time);
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
