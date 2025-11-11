@@ -1,38 +1,63 @@
-#version 330
+#version 330 core
 
 layout(location = 0) out vec4 FragColor;
-
 in vec2 v_UV;
 uniform float u_Time;
 
 const float PI = 3.141592;
+const int DROPLETS = 5; // 물방울 개수
+
+// 초기 위치
+vec2 dropletCenters[DROPLETS] = vec2[](
+    vec2(-0.5, 1.0),
+    vec2(0.3, 1.5),
+    vec2(0.7, 1.2),
+    vec2(-0.7, 1.3),
+    vec2(0.0, 1.8)
+);
+
+// 각 물방울별 시간 오프셋
+float timeOffsets[DROPLETS] = float[](0.0, 1.2, 2.1, 0.7, 1.8);
+
+// 각 물방울별 파동 속도/주기
+float speeds[DROPLETS] = float[](0.3, 0.25, 0.35, 0.28, 0.32);
+float waveScales[DROPLETS] = float[](20.0, 22.0, 18.0, 21.0, 19.0);
 
 void main()
 {
-    // 화면 중심 정규화
     vec2 uv = v_UV * 2.0 - 1.0;
-    float r = length(uv);
-    float angle = atan(uv.y, uv.x);
+    vec3 finalColor = vec3(0.0);
 
-    // 🌀 꽃잎 패턴 (4엽 형태)
-    float petal = cos(angle * 4.0);
+    for(int i = 0; i < DROPLETS; i++)
+    {
+        // 🔹 물방울 별 시간 적용
+        vec2 center = dropletCenters[i];
+        float t = u_Time + timeOffsets[i];
+        center.y -= mod(t * speeds[i], 3.0);
 
-    // 🌊 시간에 따라 퍼져나가는 원형 파동
-    float wave = sin((r * 20.0 - u_Time * 6.0) + petal * 0.5);
+        vec2 diff = uv - center;
+        float r = length(diff);
+        float angle = atan(diff.y, diff.x);
 
-    // 🌸 꽃잎 형태 강조 (sharpness 증가)
-    float intensity = pow(abs(wave), 12.0) * (1.0 - r * 0.8);
+        // 🌸 꽃잎 패턴
+        float petal = cos(angle * 4.0);
 
-    // 🌈 색상 변화 + 밝기
-    vec3 color = 0.5 + 0.5 * cos(vec3(0.8, 0.4, 0.2) * 6.2831 + u_Time * 1.5 + angle * 1.2);
-    
-    // 🌟 원이 퍼져나가며 커지는 듯한 효과 (중심 확대)
-    float radialWarp = 1.0 + 0.3 * sin(u_Time * 2.0 + r * 10.0);
-    r *= radialWarp;
+        // 🌊 개별 파동
+        float wave = sin((r * waveScales[i] - t * 6.0) + petal * 0.5);
 
-    // 💫 강도 적용
-    float fade = smoothstep(0.0, 1.0, 1.0 - r);
-    vec3 finalColor = color * intensity * fade * 2.0;
+        // 🌟 꽃잎 강조
+        float intensity = pow(abs(wave), 12.0) * (1.0 - r * 0.8);
 
+        // 💫 원형 팽창
+        float radialWarp = 1.0 + 0.3 * sin(t * 2.0 + r * 10.0);
+        r *= radialWarp;
+
+        // 💧 최종 강도
+        float fade = smoothstep(0.0, 1.0, 1.0 - r);
+        vec3 color = 0.5 + 0.5 * cos(vec3(0.8, 0.4, 0.2) * 6.2831 + t * 1.5 + angle * 1.2);
+        finalColor += color * intensity * fade * 2.0;
+    }
+
+    finalColor = clamp(finalColor, 0.0, 1.0);
     FragColor = vec4(finalColor, 1.0);
 }
