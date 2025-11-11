@@ -1,22 +1,29 @@
-#version 330
+#version 330 core
 
-layout(location=0) out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 in vec2 v_UV;
-// RS 지나고하면 도형이 차지하는 화면의 픽셀만큼 들어온다.
+
+uniform float u_Time;
 
 const float c_PI = 3.141592;
 
 void main()
 {
-	vec4 newColor = vec4(0);
-	
-//	float xValue = sin(v_UV.x * 2 * c_PI * 4);
-	float xValue =  1- pow(abs(sin(v_UV.x * 2 * c_PI * 4)), 0.5); // 0.5도 해볼것
-	float yValue =  1- pow(abs(cos(v_UV.y * 2 * c_PI * 4)), 0.5); // 0.5도 해볼것
+    // 1️⃣ 중심 좌표 계산 (0~1 UV → -1~1 중심 정규화)
+    vec2 uv = v_UV * 2.0 - 1.0;
 
-	newColor = vec4(vec3(xValue + yValue), 1);
-	
+    // 2️⃣ 원형 거리 계산
+    float r = length(uv);
 
-	FragColor = newColor;
+    // 3️⃣ 시간에 따라 물결이 바깥으로 퍼지도록 sin파 생성
+    float wave = sin(r * 20.0 - u_Time * 4.0);  // 20: 주기, 4: 속도
+
+    // 4️⃣ 파형 강조 (절댓값 후 감쇠)
+    float intensity = pow(abs(wave), 8.0) * (1.0 - r); // 바깥 갈수록 사라지게
+
+    // 5️⃣ 컬러 설정 (흰색 물결)
+    vec3 color = vec3(intensity);
+
+    FragColor = vec4(color, 1.0);
 }
