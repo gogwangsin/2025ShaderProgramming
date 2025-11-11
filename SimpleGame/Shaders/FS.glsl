@@ -12,9 +12,10 @@ void main()
 	vec4 newColor = vec4(0);
 	
 //	float xValue = sin(v_UV.x * 2 * c_PI * 4);
-	float xValue = pow(abs(sin(v_UV.x * 2 * c_PI * 4)), 10); // 0.5도 해볼것
+	float xValue =  1- pow(abs(sin(v_UV.x * 2 * c_PI * 4)), 0.5); // 0.5도 해볼것
+	float yValue =  1- pow(abs(cos(v_UV.y * 2 * c_PI * 4)), 0.5); // 0.5도 해볼것
 
-	newColor = vec4(vec3(xValue), 1);
+	newColor = vec4(vec3(xValue + yValue), 1);
 	
 
 	FragColor = newColor;
