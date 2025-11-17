@@ -1,10 +1,28 @@
 #version 330 core
 
 layout(location = 0) out vec4 FragColor;
+
 in vec2 v_UV;
-uniform float u_Time;
+
+uniform sampler2D u_RGBTexture;
+uniform float u_Time; // 시간(초단위)
 
 const float PI = 3.141592;
+
+
+void main()
+{
+    vec4 sampledColor = texture(u_RGBTexture, v_UV);
+
+    FragColor = sampledColor;
+}
+
+
+
+
+
+
+// ------------------------------------------------------------------
 const int DROPLETS = 5; // 물방울 개수
 
 // 초기 위치
@@ -23,7 +41,7 @@ float timeOffsets[DROPLETS] = float[](0.0, 1.2, 2.1, 0.7, 1.8);
 float speeds[DROPLETS] = float[](0.3, 0.25, 0.35, 0.28, 0.32);
 float waveScales[DROPLETS] = float[](20.0, 22.0, 18.0, 21.0, 19.0);
 
-void main()
+void ai()
 {
     vec2 uv = v_UV * 2.0 - 1.0;
     vec3 finalColor = vec3(0.0);
