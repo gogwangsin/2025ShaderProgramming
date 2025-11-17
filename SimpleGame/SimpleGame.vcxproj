@@ -170,13 +170,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\FS.glsl" />
+    <None Include="Shaders\FS.vs" />
     <None Include="Shaders\FullScreen.glsl" />
     <None Include="Shaders\FullScreen.vs" />
     <None Include="Shaders\GridMesh.glsl" />
     <None Include="Shaders\GridMesh.vs" />
     <None Include="Shaders\Particle.frag" />
     <None Include="Shaders\Particle.vs" />
-    <None Include="Shaders\SolidRect.frag" />
+    <None Include="Shaders\SolidRect.glsl" />
     <None Include="Shaders\SolidRect.vs" />
     <None Include="Shaders\Test.fs" />
     <None Include="Shaders\Test.vs" />

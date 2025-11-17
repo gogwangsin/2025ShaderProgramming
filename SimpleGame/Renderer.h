@@ -21,6 +21,7 @@ public:
 	void DrawParticle();
 	void DrawGridMesh();
 	void DrawFullScreenColor(float r, float g, float b, float a);
+	void DrawFS();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -71,5 +72,10 @@ private:
 
 	// For RainDrop Effect
 	float m_Points[20 * 4]; // 100개의 점 만들 것
+
+	// For Fragment Shader Factory
+	GLuint m_VBOFS = 0;
+	GLuint m_FSShader = 0;
+
 };
 

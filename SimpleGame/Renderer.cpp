@@ -52,11 +52,12 @@ void Renderer::CompileAllShaderPrograms()
 {
 	//Load shaders
 	// +) GLSL Language Integration 자체 버그로 .frag가 충돌나서 편집 안될 때가 있음 -> .fs 쓰거나 .glsl로 하기
-	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.frag");
+	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.glsl");
 	m_TestShader = CompileShaders("./Shaders/Test.vs", "./Shaders/Test.fs");
 	m_ParticleShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.frag");
 	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.glsl");
 	m_FullScreenShader = CompileShaders("./Shaders/FullScreen.vs", "./Shaders/FullScreen.glsl");
+	m_FSShader = CompileShaders("./Shaders/FS.vs", "./Shaders/FS.glsl");
 }
 
 void Renderer::DeleteAllShaderPrograms()
@@ -66,6 +67,7 @@ void Renderer::DeleteAllShaderPrograms()
 	glDeleteShader(m_ParticleShader);
 	glDeleteShader(m_GridMeshShader);
 	glDeleteShader(m_FullScreenShader);
+	glDeleteShader(m_FSShader);
 }
 
 bool Renderer::IsInitialized()
@@ -181,7 +183,22 @@ void Renderer::CreateVertexBufferObjects()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRect), fullRect, GL_STATIC_DRAW);
 	//----------------------------------------------------------------
 
+	float fullRectFS[]
+		=
+	{
+		-1.f, -1.f, 0.f,
+		-1.f,  1.f, 0.f,
+		 1.f,  1.f, 0.f, //Triangle1
 
+		-1.f, -1.f, 0.f,
+		 1.f,  1.f, 0.f,
+		 1.f ,-1.f, 0.f, //Triangle2
+	};
+
+	glGenBuffers(1, &m_VBOFS);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRectFS), fullRectFS, GL_STATIC_DRAW);
+	//----------------------------------------------------------------
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -773,12 +790,36 @@ void Renderer::DrawFullScreenColor(float r, float g, float b, float a)
 	glEnableVertexAttribArray(attribPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFullScreen); 
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); 
+	// 위치, 몇개, 자료형, [], stride, 시작포인터 
 
 	glDrawArrays(GL_TRIANGLES, 0, 6); 
+	// 0번째 정점부터 6개의 정점(vertex)를 사용해서 "삼각형"으로 그려라
 
 	glDisableVertexAttribArray(attribPosition); 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); 
 
 	glDisable(GL_BLEND);
+
+}
+
+// ------------------------------------------------------------------------------------
+
+void Renderer::DrawFS()
+{
+	int shader = m_FSShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 }
