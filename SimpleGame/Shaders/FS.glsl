@@ -5,28 +5,47 @@ layout(location = 0) out vec4 FragColor;
 in vec2 v_UV;
 
 uniform sampler2D u_RGBTexture;
-uniform float u_Time; // 시간(초단위)
+uniform float u_Time;
 
 const float PI = 3.141592;
 
+// 4×4 Gaussian kernel (1D array)
+const float kernel[16] = float[](
+    0.05, 0.10, 0.10, 0.05,
+    0.10, 0.20, 0.20, 0.10,
+    0.10, 0.20, 0.20, 0.10,
+    0.05, 0.10, 0.10, 0.05
+);
 
 void main()
 {
-// v_UV는 RS에서 온 값 그대로이다. 
-// 텍스쳐 좌표 자체는 바뀌지 않는데 샘플링할 좌표에 변화를 준 것
+    // distortion
     vec2 newUV = v_UV;
-    float delX = 0;
-    float delY = 0.2 * sin(v_UV.x * 2 * PI);
-    newUV += vec2(delX, delY);
-    
-    vec4 sampledColor = texture(u_RGBTexture, newUV);
-    sampledColor += texture(u_RGBTexture, vec2(newUV.x - 0.02, newUV.y));
-    sampledColor += texture(u_RGBTexture, vec2(newUV.x - 0.04, newUV.y));
-    sampledColor += texture(u_RGBTexture, vec2(newUV.x - 0.06, newUV.y));
-    sampledColor /= 4; // 평균
+    float delY = 0.2 * sin(v_UV.x * 2.0 * PI);
+    newUV += vec2(0.0, delY);
 
-    FragColor = sampledColor;
+    // texel size
+    vec2 texSize = textureSize(u_RGBTexture, 0);
+    vec2 texel = 1.0 / texSize;
+
+    vec4 color = vec4(0.0);
+
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            int idx = y * 4 + x;
+
+            vec2 offset = vec2(float(x - 1), float(y - 1)) * texel;
+
+            vec4 sampleColor = texture(u_RGBTexture, newUV + offset);
+            color += sampleColor * kernel[idx];
+        }
+    }
+
+    FragColor = color;
 }
+
 
 
 
