@@ -12,7 +12,18 @@ const float PI = 3.141592;
 
 void main()
 {
-    vec4 sampledColor = texture(u_RGBTexture, v_UV);
+// v_UV는 RS에서 온 값 그대로이다. 
+// 텍스쳐 좌표 자체는 바뀌지 않는데 샘플링할 좌표에 변화를 준 것
+    vec2 newUV = v_UV;
+    float delX = 0;
+    float delY = 0.2 * sin(v_UV.x * 2 * PI);
+    newUV += vec2(delX, delY);
+    
+    vec4 sampledColor = texture(u_RGBTexture, newUV);
+    sampledColor += texture(u_RGBTexture, vec2(newUV.x - 0.02, newUV.y));
+    sampledColor += texture(u_RGBTexture, vec2(newUV.x - 0.04, newUV.y));
+    sampledColor += texture(u_RGBTexture, vec2(newUV.x - 0.06, newUV.y));
+    sampledColor /= 4; // 평균
 
     FragColor = sampledColor;
 }
