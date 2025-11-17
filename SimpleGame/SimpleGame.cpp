@@ -12,7 +12,7 @@ but WITHOUT ANY WARRANTY.
 Renderer 객체로 그림 그리고, 
 이벤트와 Idle에서 화면 갱신하는 OpenGL 프로그램 구조”
 
-Shader Fighting!
+Shader Fighting! asdfs
 */
 
 #include "stdafx.h"
@@ -33,8 +33,8 @@ void RenderScene(void)
 		g_bNeedReloadShaderPrograms = false;
 	}
 
-	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
-	g_Renderer->DrawFullScreenColor(0, 0, 0, 0.04);
+	 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
+	// g_Renderer->DrawFullScreenColor(0, 0, 0, 0.04);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // 배경색 설정 (0.0, 0.3, 0.3)
 
 	// Renderer Test
