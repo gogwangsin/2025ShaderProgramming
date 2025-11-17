@@ -9,41 +9,17 @@ uniform float u_Time;
 
 const float PI = 3.141592;
 
-// 4×4 Gaussian kernel (1D array)
-const float kernel[16] = float[](
-    0.05, 0.10, 0.10, 0.05,
-    0.10, 0.20, 0.20, 0.10,
-    0.10, 0.20, 0.20, 0.10,
-    0.05, 0.10, 0.10, 0.05
-);
 
 void main()
 {
     // distortion
     vec2 newUV = v_UV;
-    float delY = 0.2 * sin(v_UV.x * 2.0 * PI);
-    newUV += vec2(0.0, delY);
+    float dx = 0;
+    float dy = 0.1 * sin(v_UV.x * 2 * PI + u_Time);
+    newUV += vec2(dx, dy);
+   vec4 sampleColor = texture(u_RGBTexture, newUV);
 
-    // texel size
-    vec2 texSize = textureSize(u_RGBTexture, 0);
-    vec2 texel = 1.0 / texSize;
-
-    vec4 color = vec4(0.0);
-
-    for (int y = 0; y < 4; y++)
-    {
-        for (int x = 0; x < 4; x++)
-        {
-            int idx = y * 4 + x;
-
-            vec2 offset = vec2(float(x - 1), float(y - 1)) * texel;
-
-            vec4 sampleColor = texture(u_RGBTexture, newUV + offset);
-            color += sampleColor * kernel[idx];
-        }
-    }
-
-    FragColor = color;
+    FragColor = sampleColor;
 }
 
 
