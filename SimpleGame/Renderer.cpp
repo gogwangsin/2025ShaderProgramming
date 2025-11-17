@@ -30,6 +30,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	// Create Texture
 	m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
+	m_Texture0 = CreatePngTexture("./twice.png", GL_NEAREST);
 
 	// Fill Points
 	int index = 0;
@@ -666,6 +667,11 @@ void Renderer::DrawGridMesh()
 
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
+	int uTextureLoc = glGetUniformLocation(m_TestShader, "u_Texture");
+	glUniform1i(uTextureLoc, 0);
+
+	glBindTexture(GL_TEXTURE_2D, m_Texture0); // 어떤 텍스쳐를 쓸 것이다.
+
 
 	int uPoitnsLoc = glGetUniformLocation(shader, "u_Points");
 	glUniform4fv(uPoitnsLoc, 20, m_Points); 

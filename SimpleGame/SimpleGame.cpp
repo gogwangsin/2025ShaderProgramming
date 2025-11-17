@@ -42,8 +42,8 @@ void RenderScene(void)
 	// g_Renderer->DrawSolidRect(0, 0, 0, 20, 1, 0, 1, 1);
 	// g_Renderer->DrawTest();
 	// g_Renderer->DrawParticle();
-	// g_Renderer->DrawGridMesh();
-	g_Renderer->DrawFS();
+	g_Renderer->DrawGridMesh();
+	// g_Renderer->DrawFS();
 
 	glutSwapBuffers(); // 더블 버퍼링 → 화면에 최종 출력
 }

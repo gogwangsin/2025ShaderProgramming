@@ -14,7 +14,7 @@ void main()
 {
     // distortion
     vec2 newUV = v_UV;
-    float dx = 0;
+    float dx = 0.1 * sin(v_UV.y * 8 * PI + u_Time);
     float dy = 0.1 * sin(v_UV.x * 2 * PI + u_Time);
     newUV += vec2(dx, dy);
    vec4 sampleColor = texture(u_RGBTexture, newUV);

@@ -3,6 +3,7 @@
 
 in vec3 a_Position;
 
+out vec2 v_UV;
 out vec4 v_Color;
 
 uniform float u_Time;
@@ -21,7 +22,7 @@ void Flag()
 	newPosition.y = newPosition.y * (1-value); // value가 1일 때 y가 0이 된다.
 
 	float deltaX = 0; // sin(2 * value * c_PI);	
-	float deltaY = value * 0.5 * sin(2 * value * c_PI - (u_Time * 80));	
+	float deltaY = value * 0.5 * sin(2 * value * c_PI - (u_Time));	
 	float newColor = (sin(2 * value * c_PI - (u_Time * 20)) + 2 ) / 2;	
 
 	newPosition += vec4(deltaX, deltaY, 0, 0);
@@ -29,6 +30,7 @@ void Flag()
 	gl_Position = newPosition;
 
 	v_Color = vec4(newColor);
+	v_UV = vec2(a_Position.x + 0.5, 0.5 - a_Position.y);
 }
 
 void Wave()
@@ -96,7 +98,7 @@ void RainDrop()
 
 void main()
 {
-	// Flag();
+	Flag();
 	// Wave();
-	RainDrop();
+	// RainDrop();
 }

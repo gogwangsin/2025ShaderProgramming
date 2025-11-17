@@ -82,5 +82,6 @@ private:
 
 	// Texture
 	GLuint m_RGBTexture = 0;
+	GLuint m_Texture0 = 0;
 };
 
