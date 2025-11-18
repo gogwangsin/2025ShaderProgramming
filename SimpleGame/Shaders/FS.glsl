@@ -83,7 +83,7 @@ void Q2()
     vec2 newUV = vec2(v_UV.x, v_UV.y); // 0~1, left bottom(0, 0)
 
     float x = fract(newUV.x * 3); // 0~3 -> fract 소수점만 취하기 -> 0,1 ~ 0,1 ~ 0,1 3번 반복된다
-    float y = (2 - floor(newUV.x * 3))/3 + newUV.y / 3;     // 0~1
+    float y = ((floor(newUV.x * 3))/3 - u_Time) + newUV.y / 3;     // 0~1
 
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
