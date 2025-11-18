@@ -25,9 +25,12 @@ void Circles()
 {
     vec2 newUV = v_UV; // 0~1, left top (0, 0)
     vec2 center = vec2(0.5, 0.5);
+    vec4 newColor = vec4(0);
+
     float d = distance(newUV, center);
 
-    vec4 newColor = vec4(d);
+    float value = sin(d * 4 * PI * 4 + u_Time);
+    newColor = vec4(value);
 
     FragColor = newColor;
 }

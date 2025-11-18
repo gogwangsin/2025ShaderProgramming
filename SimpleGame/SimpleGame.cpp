@@ -79,8 +79,8 @@ void SpecialKeyInput(int key, int x, int y)
 
 int main(int argc, char **argv)
 {
-	int winX = 800;
-	int winY = 800;
+	int winX = 500;
+	int winY = 500;
 
 	// Initialize GL things
 	glutInit(&argc, argv);
