@@ -69,10 +69,22 @@ void Q1()
 {
     vec2 newUV = vec2(v_UV.x, v_UV.y); // 0~1, left bottom(0, 0)
 
-    float x = newUV.x; // 0~1
-    float y = 1 - abs((v_UV.y - 0.5) * 2); // -0.5~0.5 => -1~1 => 1~0~1 => 0~1~0
-    // abs가 뽀인트
-    // -1 ~ 1 => [-1] [-0.5] [0.0] [0.5] [1.0] => [1 ~ 0 ~ 1]
+    float x = newUV.y; // 0~1 -> 1~0
+    float y = 1 - newUV.x;     // 0~1
+
+    vec4 newColor = texture(u_RGBTexture, vec2(x,y));
+
+    FragColor = newColor;
+}
+
+// 좌표 꼬아보기 
+void Q2()
+{
+    vec2 newUV = vec2(v_UV.x, v_UV.y); // 0~1, left bottom(0, 0)
+
+    float x = fract(newUV.x * 3); // 0~3 -> fract 소수점만 취하기 -> 0,1 ~ 0,1 ~ 0,1 3번 반복된다
+    float y = (2 - floor(newUV.x * 3))/3 + newUV.y / 3;     // 0~1
+
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
@@ -84,7 +96,8 @@ void main()
     // RGBTest();
     // Circles();
     // Flag();
-    Q1();
+    // Q1();
+    Q2();
 }
 
 
