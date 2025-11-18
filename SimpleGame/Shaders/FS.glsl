@@ -35,20 +35,46 @@ void Circles()
     FragColor = newColor;
 }
 
+// FS는 버텍스를 옮길 수 없다
 void Flag()
 {
-    vec2 newUV = v_UV; // 0~1, left top (0, 0)
+    vec2 newUV = vec2(v_UV.x, 1-v_UV.y - 0.5); // 0~1, left bottom(0, 0)
+    // UV좌표를 수정했다.
+    // 왼쪽 아래는    (0,-0.5)
+    // 왼쪽 가운데는  (0,0)
+    // 왼쪽 위는      (0,0.5)
+
     vec4 newColor = vec4(0);
 
-    float halfwidth = 0.2;
-    float sinValue = 0.2 * sin(v_UV.x * 2 * PI);
+    float halfwidth = 0.2 * (1 - newUV.x);
+    // 뾰족한 깃발이 되도록, x가 늘어날 수록 값이 작아지게
+    float sinValue = v_UV.x * 0.2 * sin(newUV.x * 2 * PI - u_Time * 2);
+    // v_UV.x를 곱하는 이유는 왼쪽은 sinvalue 영향 안받게 0값으로 출력한 것
+    // 이거 없으면 위상 이동하는 sin 그래프
 
-    if(v_UV.y < sinValue + halfwidth)
+    if(newUV.y < sinValue + halfwidth && newUV.y > sinValue - halfwidth)
     {
         newColor = vec4(1);
-        // y가 작다 -> 위쪽이 작은 부분임 헷갈릴 수 있다 
-        // 위쪽 y가 작은 부분은 흰색
     }
+    else
+    {
+        discard;
+    }
+
+    FragColor = newColor;
+}
+
+// 좌표 꼬아보기 
+void Q1()
+{
+    vec2 newUV = vec2(v_UV.x, v_UV.y); // 0~1, left bottom(0, 0)
+
+    float x = newUV.x; // 0~1
+    float y = 1 - abs((v_UV.y - 0.5) * 2); // -0.5~0.5 => -1~1 => 1~0~1 => 0~1~0
+    // abs가 뽀인트
+    // -1 ~ 1 => [-1] [-0.5] [0.0] [0.5] [1.0] => [1 ~ 0 ~ 1]
+
+    vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
     FragColor = newColor;
 }
@@ -57,7 +83,8 @@ void main()
 {
     // RGBTest();
     // Circles();
-    Flag();
+    // Flag();
+    Q1();
 }
 
 
