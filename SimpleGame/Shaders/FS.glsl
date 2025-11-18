@@ -35,10 +35,29 @@ void Circles()
     FragColor = newColor;
 }
 
+void Flag()
+{
+    vec2 newUV = v_UV; // 0~1, left top (0, 0)
+    vec4 newColor = vec4(0);
+
+    float halfwidth = 0.2;
+    float sinValue = 0.2 * sin(v_UV.x * 2 * PI);
+
+    if(v_UV.y < sinValue + halfwidth)
+    {
+        newColor = vec4(1);
+        // y가 작다 -> 위쪽이 작은 부분임 헷갈릴 수 있다 
+        // 위쪽 y가 작은 부분은 흰색
+    }
+
+    FragColor = newColor;
+}
+
 void main()
 {
     // RGBTest();
-    Circles();
+    // Circles();
+    Flag();
 }
 
 
