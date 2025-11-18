@@ -30,7 +30,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	// Create Texture
 	m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
-	m_Texture0 = CreatePngTexture("./twice.png", GL_NEAREST);
+	m_Texture0 = CreatePngTexture("./frelen2.png", GL_NEAREST);
 
 	// Fill Points
 	int index = 0;
@@ -694,10 +694,10 @@ void Renderer::DrawGridMesh()
 void Renderer::CreateGridMesh(int x, int y)
 {
 	// 화면 꽉채우게
-	float basePosX = -1.f;
-	float basePosY = -1.f;
-	float targetPosX = 1.f;
-	float targetPosY = 1.f;
+	float basePosX = -0.5f;
+	float basePosY = -0.5f;
+	float targetPosX = 0.5f;
+	float targetPosY = 0.5f;
 
 	int pointCountX = x;
 	int pointCountY = y;
