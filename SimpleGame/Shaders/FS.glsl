@@ -178,8 +178,14 @@ void Digit()
 
 void Digit_Num()
 {
-    float tx = 0.8 + v_UV.x * 0.2;
-    float ty = 0.5 + v_UV.y * 0.5;
+    int digit = 3;
+   
+
+    float offX = 0.2 * (digit - 1);
+    float offY = 0.5 * floor(digit/5);
+
+    float tx = v_UV.x * 0.2 + offX;
+    float ty = v_UV.y * 0.5 + offY;
     FragColor = texture(u_NumTexture, vec2(tx, ty));
 }
 
