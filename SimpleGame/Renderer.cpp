@@ -867,6 +867,9 @@ void Renderer::DrawFS()
 	int uDigitTextureLoc = glGetUniformLocation(shader, "u_DigitTexture");
 	glUniform1i(uDigitTextureLoc, (int)floor(m_time) % 10);
 
+	int uNumTextureLoc = glGetUniformLocation(shader, "u_NumTexture");
+	glUniform1i(uNumTextureLoc, 10);
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_0Texture);
 	glActiveTexture(GL_TEXTURE1);
