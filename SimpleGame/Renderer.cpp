@@ -30,7 +30,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	// Create Texture
 	m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
-	m_Texture0 = CreatePngTexture("./frelen2.png", GL_NEAREST);
+	m_Texture0 = CreatePngTexture("./frieren2.png", GL_NEAREST);
 
 	m_0Texture = CreatePngTexture("./0.png", GL_NEAREST);
 	m_1Texture = CreatePngTexture("./1.png", GL_NEAREST);
@@ -679,7 +679,7 @@ void Renderer::DrawGridMesh()
 
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
-	int uTextureLoc = glGetUniformLocation(m_TestShader, "u_Texture");
+	int uTextureLoc = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(uTextureLoc, 0);
 
 	glBindTexture(GL_TEXTURE_2D, m_Texture0); // 어떤 텍스쳐를 쓸 것이다.
@@ -863,13 +863,38 @@ void Renderer::DrawFS()
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
 	int uTextureLoc = glGetUniformLocation(shader, "u_RGBTexture");
-	glUniform1i(uTextureLoc, 1);
+	glUniform1i(uTextureLoc, 0);
+	int uDigitTextureLoc = glGetUniformLocation(shader, "u_DigitTexture");
+	glUniform1i(uDigitTextureLoc, (int)floor(m_time) % 10);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_0Texture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_1Texture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_2Texture);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_3Texture);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, m_4Texture);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, m_5Texture);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, m_6Texture);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, m_7Texture);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, m_8Texture);
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, m_9Texture);
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, m_NumTexture);
 
 	// 기본적으로 슬롯 0으로 바인딩 중 -> 아래 Activte를 생략중이였음
-	glActiveTexture(GL_TEXTURE0); 
+	glActiveTexture(GL_TEXTURE15); 
 	glBindTexture(GL_TEXTURE_2D, m_RGBTexture); // 어떤 텍스쳐를 쓸 것이다.
 
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE16);
 	glBindTexture(GL_TEXTURE_2D, m_Texture0); // 어떤 텍스쳐를 쓸 것이다.
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");

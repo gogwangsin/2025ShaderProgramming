@@ -5,6 +5,7 @@ layout(location = 0) out vec4 FragColor;
 in vec2 v_UV;
 
 uniform sampler2D u_RGBTexture;
+uniform sampler2D u_DigitTexture;
 uniform float u_Time;
 
 const float PI = 3.141592;
@@ -169,6 +170,11 @@ vec2 newUV = vec2(v_UV.x, v_UV.y);
     FragColor = newColor;
 }
 
+void Digit()
+{
+    FragColor = texture(u_DigitTexture, v_UV);
+}
+
 void main()
 {
     // RGBTest();
@@ -179,7 +185,8 @@ void main()
     // Q3();
     // Brick_Horizontal();
     // Brick_Vertical();
-    Brick_Horizontal_AI();
+    // Brick_Horizontal_AI();
+    Digit();
 }
 
 
