@@ -16,7 +16,7 @@ void RGBTest()
     float dx = 0.1 * sin(v_UV.y * 8 * PI + u_Time);
     float dy = 0.1 * sin(v_UV.x * 2 * PI + u_Time);
     newUV += vec2(dx, dy);
-   vec4 sampleColor = texture(u_RGBTexture, newUV);
+    vec4 sampleColor = texture(u_RGBTexture, newUV);
 
     FragColor = sampleColor;
 }
@@ -86,7 +86,6 @@ void Q2()
     float x = fract(newUV.x * 3); // 0~3 -> fract 소수점만 취하기 -> 0,1 ~ 0,1 ~ 0,1 3번 반복된다
     float y = ((floor(newUV.x * 3))/3 - u_Time) + newUV.y / 3;     // 0~1
 
-
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
     FragColor = newColor;
@@ -100,26 +99,25 @@ void Q3()
     float x = fract(newUV.x * 3) - u_Time; // 0~3 -> fract 소수점만 취하기 -> 0,1 ~ 0,1 ~ 0,1 3번 반복된다
     float y = ((v_UV.y - 0.5) * 2);     // 0~1
 
-
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
     FragColor = newColor;
 }
 
-void Brick()
+void Brick_Horizontal()
 {
     vec2 newUV = vec2(v_UV.x, v_UV.y);
-
-    float x = fract(newUV.x * 2) + floor(newUV.y * 2 + 1) * 0.5;// 0~1, 0~1
-    float y = fract(newUV.y * 2);
-
+    float rCount = 3; 
+    float sAmount = 0.2;
+    float x = fract(newUV.x * rCount) + floor(newUV.y * rCount + 1) * sAmount;// 0~1, 0~1
+    float y = fract(newUV.y * rCount);
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
     FragColor = newColor;
 }
 
-void Brick34()
+void Brick_Vertical()
 {
     vec2 newUV = vec2(v_UV.x, v_UV.y);
 
@@ -127,6 +125,46 @@ void Brick34()
     float y = fract(newUV.y * 2) + floor(newUV.x * 2) * 0.5; 
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
+
+    FragColor = newColor;
+}
+
+void Brick_Horizontal_AI()
+{
+vec2 newUV = vec2(v_UV.x, v_UV.y);
+    
+    float rCount = 3.0; 
+    float sAmount = 0.2; // 기본 오프셋 양
+    
+    // 1. 현재 행(Row)의 인덱스를 계산
+    float rowIndex = floor(newUV.y * rCount + 1.0);
+    
+    // 2. 시간 기반 흔들림 오프셋 계산
+    // cos 함수를 사용하여 주기적인 움직임을 만듭니다.
+    // rowIndex를 곱하여 각 행이 독립적으로 움직이거나 다른 위상으로 움직이게 할 수 있습니다.
+    // 0.1은 흔들림의 강도, 2.0은 흔들림의 속도를 조절합니다.
+    float swingOffset = cos(u_Time * 2.0 + rowIndex * 0.5) * 0.1; 
+    
+    // 3. 최종 X 오프셋 계산: 기본 오프셋 + 흔들림 오프셋
+    float xOffset = (rowIndex * sAmount) + swingOffset;
+    
+    // 4. U (x) 좌표 계산
+    float x = fract(newUV.x * rCount) + xOffset;
+    
+    // 5. V (y) 좌표 계산
+    float y = fract(newUV.y * rCount);
+
+    // 6. 새로운 UV를 사용해 텍스처에서 색상 샘플링
+    vec4 newColor = texture(u_RGBTexture, vec2(x, y));
+
+    // 7. (선택 사항) 시간 기반 색상 변화 추가
+    // HSL이나 RGB 채널을 직접 조작하여 색상 변화를 줄 수 있습니다.
+    // 예를 들어, 시간에 따라 색조(Hue)를 변경하거나, RGB 값에 사인파를 적용할 수 있습니다.
+    // 아래는 단순하게 R, G, B 채널에 시간에 따른 변화를 주는 예시입니다.
+     newColor.r += sin(u_Time * 1.0) * 0.1;
+     newColor.g += cos(u_Time * 1.5) * 0.1;
+     newColor.b += sin(u_Time * 2.0) * 0.1;
+     newColor = clamp(newColor, 0.0, 1.0); // 색상 값을 0~1 범위로 유지
 
     FragColor = newColor;
 }
@@ -139,9 +177,9 @@ void main()
     // Q1();
     // Q2();
     // Q3();
-    // Brick();
-    Brick34();
-        
+    // Brick_Horizontal();
+    // Brick_Vertical();
+    Brick_Horizontal_AI();
 }
 
 

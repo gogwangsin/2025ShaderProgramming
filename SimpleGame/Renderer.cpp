@@ -32,6 +32,18 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
 	m_Texture0 = CreatePngTexture("./frelen2.png", GL_NEAREST);
 
+	m_0Texture = CreatePngTexture("./0.png", GL_NEAREST);
+	m_1Texture = CreatePngTexture("./1.png", GL_NEAREST);
+	m_2Texture = CreatePngTexture("./2.png", GL_NEAREST);
+	m_3Texture = CreatePngTexture("./3.png", GL_NEAREST);
+	m_4Texture = CreatePngTexture("./4.png", GL_NEAREST);
+	m_5Texture = CreatePngTexture("./5.png", GL_NEAREST);
+	m_6Texture = CreatePngTexture("./6.png", GL_NEAREST);
+	m_7Texture = CreatePngTexture("./7.png", GL_NEAREST);
+	m_8Texture = CreatePngTexture("./8.png", GL_NEAREST);
+	m_9Texture = CreatePngTexture("./9.png", GL_NEAREST);
+	m_NumTexture = CreatePngTexture("./numbers.png", GL_NEAREST);
+
 	// Fill Points
 	int index = 0;
 	for (int i = 0; i < 20; ++i)
@@ -848,12 +860,17 @@ void Renderer::DrawFS()
 
 	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
 
-	int uTimeLoc = glGetUniformLocation(m_TestShader, "u_Time");
+	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
-	int uTextureLoc = glGetUniformLocation(m_TestShader, "u_RGBTexture");
-	glUniform1i(uTextureLoc, 0);
+	int uTextureLoc = glGetUniformLocation(shader, "u_RGBTexture");
+	glUniform1i(uTextureLoc, 1);
 
+	// 기본적으로 슬롯 0으로 바인딩 중 -> 아래 Activte를 생략중이였음
+	glActiveTexture(GL_TEXTURE0); 
 	glBindTexture(GL_TEXTURE_2D, m_RGBTexture); // 어떤 텍스쳐를 쓸 것이다.
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_Texture0); // 어떤 텍스쳐를 쓸 것이다.
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
