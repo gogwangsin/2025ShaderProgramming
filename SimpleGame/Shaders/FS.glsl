@@ -119,6 +119,18 @@ void Brick()
     FragColor = newColor;
 }
 
+void Brick34()
+{
+    vec2 newUV = vec2(v_UV.x, v_UV.y);
+
+    float x = fract(newUV.x * 2);// 0~1, 0~1
+    float y = fract(newUV.y * 2) + floor(newUV.x * 2) * 0.5; 
+
+    vec4 newColor = texture(u_RGBTexture, vec2(x,y));
+
+    FragColor = newColor;
+}
+
 void main()
 {
     // RGBTest();
@@ -127,7 +139,9 @@ void main()
     // Q1();
     // Q2();
     // Q3();
-    Brick();
+    // Brick();
+    Brick34();
+        
 }
 
 
