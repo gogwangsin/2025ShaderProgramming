@@ -74,6 +74,7 @@ void Renderer::CompileAllShaderPrograms()
 	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.glsl");
 	m_FullScreenShader = CompileShaders("./Shaders/FullScreen.vs", "./Shaders/FullScreen.glsl");
 	m_FSShader = CompileShaders("./Shaders/FS.vs", "./Shaders/FS.glsl");
+	m_TexShader = CompileShaders("./Shaders/Texture.vs", "./Shaders/Texture.glsl");
 }
 
 void Renderer::DeleteAllShaderPrograms()
@@ -84,6 +85,7 @@ void Renderer::DeleteAllShaderPrograms()
 	glDeleteShader(m_GridMeshShader);
 	glDeleteShader(m_FullScreenShader);
 	glDeleteShader(m_FSShader);
+	glDeleteShader(m_TexShader);
 }
 
 bool Renderer::IsInitialized()
@@ -215,6 +217,22 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRectFS), fullRectFS, GL_STATIC_DRAW);
 	//----------------------------------------------------------------
+
+	float texRect[]
+		=
+	{
+		-1.f, -1.f, 0.f, 0.f, 1.f,
+		 1.f,  1.f, 0.f, 1.f, 0.f,
+		-1.f,  1.f, 0.f, 0.f, 0.f, //Triangle1 - texture 좌표 추가 왼쪽 아래가 0,0
+
+		-1.f, -1.f, 0.f, 0.f, 1.f,
+		 1.f, -1.f, 0.f, 1.f, 1.f,
+		 1.f , 1.f, 0.f, 1.f, 0.f, //Triangle2
+	};
+
+	glGenBuffers(1, &m_TexVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TexVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(texRect), texRect, GL_STATIC_DRAW);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -910,5 +928,31 @@ void Renderer::DrawFS()
 
 	glDisableVertexAttribArray(attribPosition);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+}
+
+// ------------------------------------------------------------------------------------
+
+void Renderer::DrawTexture(float x, float y, float sizeX, float sizeY, GLuint TextureID)
+{
+	int shader = m_TexShader;
+	glUseProgram(shader);
+
+	int uTex = glGetUniformLocation(shader, "u_TexID");
+	glUniform1i(uTex, 0); // 0번지 0번 슬롯을 쓸 것이다
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	int attribTex = glGetAttribLocation(shader, "a_Tex");
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTex);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_TexVBO);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 }
