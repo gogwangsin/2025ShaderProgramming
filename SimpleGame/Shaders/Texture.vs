@@ -5,9 +5,14 @@ in vec2 a_Tex;
 
 out vec2 v_Tex;
 
+uniform vec2 u_Size;
+uniform vec2 u_Trans;
+
 void main()
 {
 	vec4 newPosition = vec4(a_Position, 1);
+	newPosition.xy *= u_Size;
+	newPosition.xy += u_Trans;
 
 	gl_Position = newPosition;
 

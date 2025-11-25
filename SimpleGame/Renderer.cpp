@@ -30,7 +30,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	// Create Texture
 	m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
-	m_Texture0 = CreatePngTexture("./frieren2.png", GL_NEAREST);
+	m_MyTexture = CreatePngTexture("./frieren2.png", GL_NEAREST);
 
 	m_0Texture = CreatePngTexture("./0.png", GL_NEAREST);
 	m_1Texture = CreatePngTexture("./1.png", GL_NEAREST);
@@ -43,6 +43,9 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_8Texture = CreatePngTexture("./8.png", GL_NEAREST);
 	m_9Texture = CreatePngTexture("./9.png", GL_NEAREST);
 	m_NumTexture = CreatePngTexture("./numbers.png", GL_NEAREST);
+
+	// Create FBOs ( Frame Buffer Object )
+	CreateFBOs();
 
 	// Fill Points
 	int index = 0;
@@ -408,6 +411,71 @@ GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
 	return temp;
 }
 
+void Renderer::CreateFBOs()
+{
+	// Generate Color Buffer
+	glGenTextures(1, &m_RT0);
+	glBindTexture(GL_TEXTURE_2D, m_RT0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	// Generate Depth Buffer
+	GLuint depthBuffer;
+	glGenRenderbuffers(1, &depthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	// Generate FBO
+	glGenFramebuffers(1, &m_FBO0);
+
+	// Attach to FBO
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO0); // attach 하기 전에 bind부터 하고
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_RT0, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+	// Check ! - 이게 제대로 쓸 수 있는게 맞는지
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE)// COMPLETE이 아닌 경우 다 에러
+	{
+		assert(0); 
+	}
+
+	//-----------------------------------------------------------------------------------
+
+	// Generate Color Buffer
+	glGenTextures(1, &m_RT1);
+	glBindTexture(GL_TEXTURE_2D, m_RT1);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	// Generate FBO
+	glGenFramebuffers(1, &m_FBO1);
+
+	// Attach to FBO
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO1); // attach 하기 전에 bind부터 하고
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_RT1, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+	// Check ! - 이게 제대로 쓸 수 있는게 맞는지
+	status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE)// COMPLETE이 아닌 경우 다 에러
+	{
+		assert(0);
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+}
+
 //----------------------------------------------------------------
 
 void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
@@ -700,7 +768,7 @@ void Renderer::DrawGridMesh()
 	int uTextureLoc = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(uTextureLoc, 0);
 
-	glBindTexture(GL_TEXTURE_2D, m_Texture0); // 어떤 텍스쳐를 쓸 것이다.
+	glBindTexture(GL_TEXTURE_2D, m_MyTexture); // 어떤 텍스쳐를 쓸 것이다.
 
 
 	int uPoitnsLoc = glGetUniformLocation(shader, "u_Points");
@@ -916,7 +984,7 @@ void Renderer::DrawFS()
 	glBindTexture(GL_TEXTURE_2D, m_RGBTexture); // 어떤 텍스쳐를 쓸 것이다.
 
 	glActiveTexture(GL_TEXTURE16);
-	glBindTexture(GL_TEXTURE_2D, m_Texture0); // 어떤 텍스쳐를 쓸 것이다.
+	glBindTexture(GL_TEXTURE_2D, m_MyTexture); // 어떤 텍스쳐를 쓸 것이다.
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
@@ -935,14 +1003,23 @@ void Renderer::DrawFS()
 
 void Renderer::DrawTexture(float x, float y, float sizeX, float sizeY, GLuint TextureID)
 {
+	// x, y -> 센터 기준 위치
+	// sx, sy -> 비율 ratio
+
 	int shader = m_TexShader;
 	glUseProgram(shader);
 
 	int uTex = glGetUniformLocation(shader, "u_TexID");
 	glUniform1i(uTex, 0); // 0번지 0번 슬롯을 쓸 것이다
 
+	int uSize = glGetUniformLocation(shader, "u_Size");
+	glUniform2f(uSize, sizeX, sizeY); 
+
+	int uTrans = glGetUniformLocation(shader, "u_Trans");
+	glUniform2f(uTrans, x, y); 
+
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
+	glBindTexture(GL_TEXTURE_2D, TextureID);
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	int attribTex = glGetAttribLocation(shader, "a_Tex");
@@ -955,4 +1032,33 @@ void Renderer::DrawTexture(float x, float y, float sizeX, float sizeY, GLuint Te
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+}
+
+void Renderer::DrawDebugTexture()
+{
+	//DrawTexture(-0.8, -0.8, 0.2, 0.2, m_RGBTexture);
+	//DrawTexture(-0.4, -0.8, 0.2, 0.2, m_MyTexture);
+
+	DrawTexture(-0.8, -0.8, 0.2, 0.2, m_RT0);
+	DrawTexture(-0.4, -0.8, 0.2, 0.2, m_RT1);
+}
+
+void Renderer::DrawFBOs()
+{
+	// 1. Set FBO 
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
+
+	// 2. Draw
+	DrawParticle(); // 찻번째 FBO는 Particle
+
+	// 1. Set FBO 
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
+
+	// 2. Draw
+	DrawGridMesh();
+
+	// 3. Restore FBO 
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

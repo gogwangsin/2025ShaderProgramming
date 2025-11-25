@@ -25,6 +25,8 @@ public:
 	void DrawFullScreenColor(float r, float g, float b, float a);
 	void DrawFS();
 	void DrawTexture(float x, float y, float sizeX, float sizeY, GLuint TextureID);
+	void DrawDebugTexture();
+	void DrawFBOs();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -40,7 +42,7 @@ private:
 	void GenerateParticles(int numParticle);
 	void CreateGridMesh(int x, int y);
 	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod);
-
+	void CreateFBOs();
 	// Alt + '+' + Enter : 정의 만들기
 
 private:
@@ -83,7 +85,7 @@ private:
 
 	// Texture
 	GLuint m_RGBTexture = 0;
-	GLuint m_Texture0 = 0;
+	GLuint m_MyTexture = 0;
 
 	GLuint m_0Texture = 0;
 	GLuint m_1Texture = 0;
@@ -101,5 +103,18 @@ private:
 	GLuint m_TexVBO = 0;
 	GLuint m_TexShader = 0;
 
+	// FBO Color Buffers
+	GLuint m_RT0 = 0; // render target
+	GLuint m_RT1 = 0;
+	GLuint m_RT2 = 0;
+	GLuint m_RT3 = 0;
+	GLuint m_RT4 = 0;
+
+	// FBOs
+	GLuint m_FBO0 = 0;
+	GLuint m_FBO1 = 0;
+	GLuint m_FBO2 = 0;
+	GLuint m_FBO3 = 0;
+	GLuint m_FBO4 = 0;
 };
 
