@@ -178,15 +178,47 @@ void Digit()
 
 void Digit_Num()
 {
-    int digit = int(u_Time) % 10;
-   
-    int tileIndex = (digit + 9) % 10;
+    // 1. 현재 시간에서 00-99 사이의 두 자릿수 계산
+    int currentNum = int(u_Time) % 100;
+    int tensDigit = currentNum / 10;      // 십의 자리 숫자 (예: 54 -> 5)
+    int unitsDigit = currentNum % 10;    // 일의 자리 숫자 (예: 54 -> 4)
 
-    float offX = float(tileIndex % 5) / 5.0;
+    int digitIndex; // 최종적으로 선택된 숫자 (0~9)
+    vec2 localUV;   // 각 숫자 영역(왼쪽/오른쪽) 내에서 0.0 ~ 1.0으로 재매핑된 UV
+
+    // 2. 화면의 절반을 기준으로 어느 숫자를 그릴지 결정
+    
+    // 화면 왼쪽 절반 (v_UV.x < 0.5): 십의 자리 출력
+    if (v_UV.x < 0.5) {
+        digitIndex = tensDigit;
+        // X 좌표를 0.0~0.5 범위에서 0.0~1.0 범위로 확장 (좌표 재매핑)
+        localUV.x = v_UV.x * 2.0; 
+    } 
+    // 화면 오른쪽 절반 (v_UV.x >= 0.5): 일의 자리 출력
+    else {
+        digitIndex = unitsDigit;
+        // X 좌표를 0.5~1.0 범위에서 0.0~1.0 범위로 재매핑
+        localUV.x = (v_UV.x - 0.5) * 2.0; 
+    }
+    
+    localUV.y = v_UV.y; // Y 좌표는 그대로 유지
+
+    // 3. 텍스처 타일 오프셋 계산 (원본 Digit_Num 로직 재사용)
+    // 원본 함수와 동일한 방식으로 tileIndex를 계산
+    int tileIndex = (digitIndex + 9) % 10; 
+    
+    // 텍스처 시트가 5x2 배열이라고 가정하고 오프셋 계산
+    // offX: 타일의 가로 위치 (0/5, 1/5, 2/5, 3/5, 4/5)
+    float offX = float(tileIndex % 5) / 5.0; 
+    // offY: 타일의 세로 위치 (0/2, 1/2)
     float offY = floor(float(tileIndex) / 5.0) / 2.0;
 
-    float tx = v_UV.x / 5 + offX;
-    float ty = v_UV.y / 2 + offY;
+    // 4. 최종 텍스처 좌표 계산 및 색상 샘플링
+    // localUV.x(0.0~1.0)에 1/5 스케일링을 적용하여 타일 너비(0.2)를 만듭니다.
+    float tx = localUV.x / 5.0 + offX;
+    // localUV.y(0.0~1.0)에 1/2 스케일링을 적용하여 타일 높이(0.5)를 만듭니다.
+    float ty = localUV.y / 2.0 + offY;
+    
     FragColor = texture(u_NumTexture, vec2(tx, ty));
 }
 
