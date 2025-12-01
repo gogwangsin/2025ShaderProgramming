@@ -1051,6 +1051,12 @@ void Renderer::DrawTexture(float x, float y, float sizeX, float sizeY, GLuint Te
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TextureID);
 
+	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
+
+	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
+	glUniform1f(uTimeLoc, m_time);
+
+
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	int attribTex = glGetAttribLocation(shader, "a_Tex");
 	glEnableVertexAttribArray(attribPosition);

@@ -13,7 +13,7 @@ uniform float u_Time;
 
 const float PI = 3.141592;
 
-void RGBTest()
+vec4 RGBTest()
 {
     // distortion
     vec2 newUV = v_UV;
@@ -22,10 +22,11 @@ void RGBTest()
     newUV += vec2(dx, dy);
     vec4 sampleColor = texture(u_RGBTexture, newUV);
 
-    FragColor = sampleColor;
+//    FragColor = sampleColor;
+    return sampleColor;
 }
 
-void Circles()
+vec4 Circles()
 {
     vec2 newUV = v_UV; // 0~1, left top (0, 0)
     vec2 center = vec2(0.5, 0.5);
@@ -33,14 +34,14 @@ void Circles()
 
     float d = distance(newUV, center);
 
-    float value = sin(d * 4 * PI * 4 + u_Time);
+    float value = sin(d * 4 * PI * 4 - u_Time * 4);
     newColor = vec4(value);
 
-    FragColor = newColor;
+    return newColor;
 }
 
 // FS는 버텍스를 옮길 수 없다
-void Flag()
+vec4 Flag()
 {
     vec2 newUV = vec2(v_UV.x, 1-v_UV.y - 0.5); // 0~1, left bottom(0, 0)
     // UV좌표를 수정했다.
@@ -62,14 +63,15 @@ void Flag()
     }
     else
     {
-        discard;
+        // 임시 주석 12/01 MRT
+        // discard; 
     }
 
-    FragColor = newColor;
+    return newColor;
 }
 
 // 좌표 꼬아보기 
-void Q1()
+vec4 Q1()
 {
    vec2 newUV = vec2(v_UV.x, v_UV.y); // 0~1, left bottom(0, 0)
 
@@ -79,11 +81,11 @@ void Q1()
     // -1 ~ 1 => [-1] [-0.5] [0.0] [0.5] [1.0] => [1 ~ 0 ~ 1]
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
-    FragColor = newColor;
+    return newColor;
 }
 
 // 좌표 꼬아보기 
-void Q2()
+vec4 Q2()
 {
     vec2 newUV = vec2(v_UV.x, v_UV.y); // 0~1, left bottom(0, 0)
 
@@ -92,11 +94,11 @@ void Q2()
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
-    FragColor = newColor;
+    return newColor;
 }
 
 // 좌표 꼬아보기 
-void Q3()
+vec4 Q3()
 {
     vec2 newUV = vec2(v_UV.x, v_UV.y); // 0~1, left bottom(0, 0)
 
@@ -105,10 +107,10 @@ void Q3()
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
-    FragColor = newColor;
+    return newColor;
 }
 
-void Brick_Horizontal()
+vec4 Brick_Horizontal()
 {
     vec2 newUV = vec2(v_UV.x, v_UV.y);
     float rCount = 3; 
@@ -118,10 +120,10 @@ void Brick_Horizontal()
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
-    FragColor = newColor;
+    return newColor;
 }
 
-void Brick_Vertical()
+vec4 Brick_Vertical()
 {
     vec2 newUV = vec2(v_UV.x, v_UV.y);
 
@@ -130,12 +132,12 @@ void Brick_Vertical()
 
     vec4 newColor = texture(u_RGBTexture, vec2(x,y));
 
-    FragColor = newColor;
+    return newColor;
 }
 
-void Brick_Horizontal_AI()
+vec4 Brick_Horizontal_AI()
 {
-vec2 newUV = vec2(v_UV.x, v_UV.y);
+    vec2 newUV = vec2(v_UV.x, v_UV.y);
     
     float rCount = 3.0; 
     float sAmount = 0.2; // 기본 오프셋 양
@@ -170,15 +172,15 @@ vec2 newUV = vec2(v_UV.x, v_UV.y);
      newColor.b += sin(u_Time * 2.0) * 0.1;
      newColor = clamp(newColor, 0.0, 1.0); // 색상 값을 0~1 범위로 유지
 
-    FragColor = newColor;
+    return newColor;
 }
 
-void Digit()
+vec4 Digit()
 {
-    FragColor = texture(u_DigitTexture, v_UV);
+    return texture(u_DigitTexture, v_UV);
 }
 
-void Digit_Num()
+vec4 Digit_Num()
 {
     // 1. 현재 시간에서 00-99 사이의 두 자릿수 계산
     int currentNum = int(u_Time) % 100;
@@ -221,7 +223,7 @@ void Digit_Num()
     // localUV.y(0.0~1.0)에 1/2 스케일링을 적용하여 타일 높이(0.5)를 만듭니다.
     float ty = localUV.y / 2.0 + offY;
     
-    FragColor = texture(u_NumTexture, vec2(tx, ty));
+   return texture(u_NumTexture, vec2(tx, ty));
 }
 
 void main()
@@ -236,9 +238,11 @@ void main()
     // Brick_Vertical();
     // Brick_Horizontal_AI();
     // Digit();
-    Digit_Num();
+    // Digit_Num();
 
-    FragColor1 = vec4(1, 0, 0, 1);
+    FragColor = Circles();
+     
+    FragColor1 = Flag();
 }
 
 
