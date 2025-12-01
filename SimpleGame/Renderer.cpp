@@ -414,8 +414,17 @@ GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
 void Renderer::CreateFBOs()
 {
 	// Generate Color Buffer
-	glGenTextures(1, &m_RT0);
-	glBindTexture(GL_TEXTURE_2D, m_RT0);
+	glGenTextures(1, &m_RT0_0);
+	glBindTexture(GL_TEXTURE_2D, m_RT0_0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glGenTextures(1, &m_RT0_1);
+	glBindTexture(GL_TEXTURE_2D, m_RT0_1);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -435,9 +444,12 @@ void Renderer::CreateFBOs()
 
 	// Attach to FBO
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO0); // attach 하기 전에 bind부터 하고
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_RT0, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_RT0_0, 0);
 	// GL_COLOR_ATTACHMENT0 여기 0이 FS.glsl에 layout = 0과 관련있다. - 12/01
 	// 그래고 얘를 1로 하고 layout을 1로 해도 똑같이 안그려진다. 기본으로 0을 사용하도록 되어 있기에
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_RT0_1, 0);
+	// 1개의 FBO에 2개의 RT가 연결됐다
+
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 	// Check ! - 이게 제대로 쓸 수 있는게 맞는지
@@ -450,8 +462,17 @@ void Renderer::CreateFBOs()
 	//-----------------------------------------------------------------------------------
 
 	// Generate Color Buffer
-	glGenTextures(1, &m_RT1);
-	glBindTexture(GL_TEXTURE_2D, m_RT1);
+	glGenTextures(1, &m_RT1_0);
+	glBindTexture(GL_TEXTURE_2D, m_RT1_0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glGenTextures(1, &m_RT1_1);
+	glBindTexture(GL_TEXTURE_2D, m_RT1_1);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -464,7 +485,8 @@ void Renderer::CreateFBOs()
 
 	// Attach to FBO
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO1); // attach 하기 전에 bind부터 하고
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_RT1, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_RT1_0, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_RT1_1, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 	// Check ! - 이게 제대로 쓸 수 있는게 맞는지
@@ -945,9 +967,11 @@ void Renderer::DrawFS()
 	//Program select
 	glUseProgram(shader);
 
-	// 12/1 추가 -> GL_COLOR_ATTACHMENT0 : 디폴트로 이게 호출되고 있었는데 생략하고 있었다.
-	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(1, DrawBuffers);
+	// 0번과 1번에 attach되어 있는 RenderTarget에다가 두개를 사용하겠다 
+	// FragColor : 0번
+	// FragColor1 : Attachment 1에 연결된게 출력된다
+	GLenum DrawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, DrawBuffers);
 
 
 	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
@@ -1045,8 +1069,9 @@ void Renderer::DrawDebugTexture()
 	//DrawTexture(-0.8, -0.8, 0.2, 0.2, m_RGBTexture);
 	//DrawTexture(-0.4, -0.8, 0.2, 0.2, m_MyTexture);
 
-	DrawTexture(-0.5, -0.5, 0.5, 0.5, m_RT0);
-	DrawTexture( 0.5, -0.5, 0.5, 0.5, m_RT1);
+	// MRT : Multiple Render Target
+	DrawTexture(-0.5, -0.5, 0.5, 0.5, m_RT0_0);
+	DrawTexture( 0.5, -0.5, 0.5, 0.5, m_RT0_1);
 }
 
 void Renderer::DrawFBOs()

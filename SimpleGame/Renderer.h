@@ -104,8 +104,10 @@ private:
 	GLuint m_TexShader = 0;
 
 	// FBO Color Buffers
-	GLuint m_RT0 = 0; // render target
-	GLuint m_RT1 = 0;
+	GLuint m_RT0_0 = 0; // render target _0,1 attachment N번에 연결할 거다.
+	GLuint m_RT0_1 = 0; // render target
+	GLuint m_RT1_0 = 0;
+	GLuint m_RT1_1 = 0;
 	GLuint m_RT2 = 0;
 	GLuint m_RT3 = 0;
 	GLuint m_RT4 = 0;
