@@ -1,6 +1,8 @@
 #version 330 core
 
 layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 FragColor1; 
+// 그린 것들을 다른 버퍼(다른 렌더타겟들)에 저장하고 동시 출력하면 drawcall 두번하는 것보다 효율적이지 않나
 
 in vec2 v_UV;
 
@@ -235,6 +237,8 @@ void main()
     // Brick_Horizontal_AI();
     // Digit();
     Digit_Num();
+
+    FragColor1 = vec4(1, 0, 0, 1);
 }
 
 

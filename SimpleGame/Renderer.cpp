@@ -435,7 +435,9 @@ void Renderer::CreateFBOs()
 
 	// Attach to FBO
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO0); // attach 하기 전에 bind부터 하고
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_RT0, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_RT0, 0);
+	// GL_COLOR_ATTACHMENT0 여기 0이 FS.glsl에 layout = 0과 관련있다. - 12/01
+	// 그래고 얘를 1로 하고 layout을 1로 해도 똑같이 안그려진다. 기본으로 0을 사용하도록 되어 있기에
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 	// Check ! - 이게 제대로 쓸 수 있는게 맞는지
@@ -473,7 +475,6 @@ void Renderer::CreateFBOs()
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 }
 
 //----------------------------------------------------------------
@@ -944,6 +945,11 @@ void Renderer::DrawFS()
 	//Program select
 	glUseProgram(shader);
 
+	// 12/1 추가 -> GL_COLOR_ATTACHMENT0 : 디폴트로 이게 호출되고 있었는데 생략하고 있었다.
+	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(1, DrawBuffers);
+
+
 	m_time += 0.00016; // 대충 60fps = 0.016 - 너무 빨라서 줄였음
 
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
@@ -1049,8 +1055,10 @@ void Renderer::DrawFBOs()
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO0);
 	glViewport(0, 0, 512, 512); // 왼쪽 아래 (0,0)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
+
 	// 2. Draw
-	DrawParticle(); // 찻번째 FBO는 Particle
+//	DrawParticle(); // 찻번째 FBO는 Particle
+	DrawFS();
 
 	// 1. Set FBO 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO1);
