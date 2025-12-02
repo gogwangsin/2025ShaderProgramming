@@ -29,7 +29,7 @@ void main()
 	FragColor = result;
 
 	if(brightness > 1.0)
-		FragColor1 = result;
+		FragColor1 = result - vec4(1);
 	else
 		FragColor1 = vec4(0);
 

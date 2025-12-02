@@ -36,7 +36,7 @@ void RenderScene(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
 	// g_Renderer->DrawFullScreenColor(0, 0, 0, 0.04);
-	glClearColor(0.7f, 0.7f, 0.4f, 0.0f); // 배경색 설정 (0.0, 0.3, 0.3)
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // 배경색 설정 (0.0, 0.3, 0.3)
 
 	// Renderer Test
 	// g_Renderer->DrawSolidRect(0, 0, 0, 20, 1, 0, 1, 1);

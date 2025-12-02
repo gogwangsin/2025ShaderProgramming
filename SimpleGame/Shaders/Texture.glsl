@@ -4,7 +4,8 @@ layout(location=0) out vec4 FragColor;
 // 이 0이 GL_COLOR_ATTACHMENT0 이거 0이랑 같은 곳을 가리키는 것이다 - 아마
 
 uniform sampler2D u_TexID;
-uniform int u_Method; // 0: normal 텍스쳐 매핑, 1: BlurH, 2: BlurV 이 값에 따라 분기
+uniform sampler2D u_TexID1;
+uniform int u_Method; // 0: normal 텍스쳐 매핑, 1: BlurH, 2: BlurV 이 값에 따라 분기, 3: Merge
 
 uniform float u_Time;
 const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
@@ -192,6 +193,22 @@ vec4 BlurVertical() // 세로축 Blur
     return vec4(result, 1.0);
 }
 
+// 원래 영상과 합성하여 최종 렌더링 (FS 코드)
+vec4 Merge()
+{             
+    const float gamma = 2.2;
+    vec3 hdrColor = texture(u_TexID, vec2(v_Tex.x, 1-v_Tex.y)).rgb; // Texture는 반대로      
+    vec3 bloomColor = texture(u_TexID1, v_Tex).rgb; // RT은 정상,
+    hdrColor += bloomColor; 
+
+    // tone mapping
+    vec3 result = vec3(1.0) - exp(-hdrColor * 5);
+
+    // also gamma correct while we're at it       
+    result = pow(result, vec3(1.0 / gamma));
+    return vec4(result, 1.0);
+} 
+
 void main()
 {   
     FragColor = vec4(0);
@@ -209,7 +226,10 @@ void main()
     {
         FragColor = BlurVertical();
     }
-
+    else if(u_Method == 3)
+    {
+        FragColor = Merge();
+    }
 
 
 
