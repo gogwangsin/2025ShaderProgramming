@@ -31,6 +31,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	// Create Texture
 	m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
 	m_MyTexture = CreatePngTexture("./frieren2.png", GL_NEAREST);
+	m_ParticleTex = CreatePngTexture("./particle1.png", GL_NEAREST);
 
 	m_0Texture = CreatePngTexture("./0.png", GL_NEAREST);
 	m_1Texture = CreatePngTexture("./1.png", GL_NEAREST);
@@ -497,7 +498,50 @@ void Renderer::CreateFBOs()
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//--------------------------------------------------
+// 	 12/02 수업 - Bloom 텍스쳐 채널 범위를 기존 8 bit에서 16 float 로 변경 
+// 
+	// Generate Color Buffer
+	glGenTextures(1, &m_HDRRT0_0);
+	glBindTexture(GL_TEXTURE_2D, m_HDRRT0_0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	// GL_RGBA16F 이게 뽀인트
+
+	glGenTextures(1, &m_HDRRT0_1);
+	glBindTexture(GL_TEXTURE_2D, m_HDRRT0_1);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	// Generate FBO
+	glGenFramebuffers(1, &m_HDRFBO0);
+
+	// Attach to FBO
+	glBindFramebuffer(GL_FRAMEBUFFER, m_HDRFBO0); // attach 하기 전에 bind부터 하고
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_HDRRT0_0, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_HDRRT0_1, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+	// Check ! - 이게 제대로 쓸 수 있는게 맞는지
+	status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE)// COMPLETE이 아닌 경우 다 에러
+	{
+		assert(0);
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
+
+
 
 //----------------------------------------------------------------
 
@@ -582,10 +626,19 @@ void Renderer::DrawParticle()
 	GLuint shader = m_ParticleShader;
 	glUseProgram(shader);
 
+	GLenum DrawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, DrawBuffers);
+
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
 	int uForceLoc = glGetUniformLocation(shader, "u_Force");
 	glUniform3f(uForceLoc, std::sin(m_time), 0, 0); // vec3이니 3f
+
+	int uTexLoc = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(uTexLoc, 0); // 12/01
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_ParticleTex);
 
 	int aPosLoc = glGetAttribLocation(shader, "a_Position");
 	int aValueLoc = glGetAttribLocation(shader, "a_Value");
@@ -595,8 +648,9 @@ void Renderer::DrawParticle()
 	int aLifeTimeLoc = glGetAttribLocation(shader, "a_LifeTime");
 	int aMassLoc = glGetAttribLocation(shader, "a_Mass");
 	int aPeriodLoc = glGetAttribLocation(shader, "a_Period");
+	int aTexLoc = glGetAttribLocation(shader, "a_Tex");
 
-	int stride = 15;
+	int stride = 17;
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);
 
 	glEnableVertexAttribArray(aPosLoc);
@@ -607,6 +661,7 @@ void Renderer::DrawParticle()
 	glEnableVertexAttribArray(aLifeTimeLoc);
 	glEnableVertexAttribArray(aMassLoc);
 	glEnableVertexAttribArray(aPeriodLoc);
+	glEnableVertexAttribArray(aTexLoc);
 
 	glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * stride, 0);
 	glVertexAttribPointer(aValueLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 3));
@@ -616,6 +671,7 @@ void Renderer::DrawParticle()
 	glVertexAttribPointer(aLifeTimeLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 12)); // 9->10이 아니고 9 + 3해서 12
 	glVertexAttribPointer(aMassLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 13)); 
 	glVertexAttribPointer(aPeriodLoc, 1, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 14));
+	glVertexAttribPointer(aTexLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * 15));
 
 
 	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount);
@@ -631,8 +687,8 @@ void Renderer::DrawParticle()
 void Renderer::GenerateParticles(int numParticle)
 {
 	int floatCountPerVertex = 
-		3 + 1 + 4 + 1 + 3 + 1 + 1 + 1; 
-	// 좌표3, 값1, 색4 - x, y, z, value, r, g, b, a, sTime, vx, vy, vz, lifeTime, mass, period
+		3 + 1 + 4 + 1 + 3 + 1 + 1 + 1 + 2; 
+	// 좌표3, 값1, 색4 - x, y, z, value, r, g, b, a, sTime, vx, vy, vz, lifeTime, mass, period, textureX, textureY
 	int verticesCountPerParticle = 6;
 	int floatCountPerParticle = floatCountPerVertex * verticesCountPerParticle;
 	int totalVerticesCount = numParticle * verticesCountPerParticle;
@@ -683,6 +739,8 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
 		vertices[index] = period; index++;
+		vertices[index] = 0; index++;
+		vertices[index] = 1; index++;
 
 		vertices[index] = x + size; index++; // v2
 		vertices[index] = y + size; index++;
@@ -699,6 +757,8 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
 		vertices[index] = period; index++;
+		vertices[index] = 1; index++;
+		vertices[index] = 0; index++;
 
 		vertices[index] = x - size; index++; // v3
 		vertices[index] = y + size; index++;
@@ -715,6 +775,8 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
 		vertices[index] = period; index++;
+		vertices[index] = 0; index++;
+		vertices[index] = 0; index++;
 
 		vertices[index] = x - size; index++; // v4
 		vertices[index] = y - size; index++;
@@ -731,6 +793,8 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
 		vertices[index] = period; index++;
+		vertices[index] = 0; index++;
+		vertices[index] = 1; index++;
 
 		vertices[index] = x + size; index++; // v5
 		vertices[index] = y - size; index++;
@@ -747,6 +811,8 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
 		vertices[index] = period; index++;
+		vertices[index] = 1; index++;
+		vertices[index] = 1; index++;
 
 		vertices[index] = x + size; index++; // v6
 		vertices[index] = y + size; index++;
@@ -763,6 +829,8 @@ void Renderer::GenerateParticles(int numParticle)
 		vertices[index] = lifetime; index++;
 		vertices[index] = mass; index++;
 		vertices[index] = period; index++;
+		vertices[index] = 1; index++;
+		vertices[index] = 0; index++;
 	}
 
 	glGenBuffers(1, &m_VBOParticle);
@@ -1075,12 +1143,13 @@ void Renderer::DrawDebugTexture()
 	//DrawTexture(-0.4, -0.8, 0.2, 0.2, m_MyTexture);
 
 	// MRT : Multiple Render Target
-	DrawTexture(-0.5, -0.5, 0.5, 0.5, m_RT0_0);
-	DrawTexture( 0.5, -0.5, 0.5, 0.5, m_RT0_1);
+	DrawTexture(-0.5, -0.5, 0.5, 0.5, m_HDRRT0_0);
+	DrawTexture( 0.5, -0.5, 0.5, 0.5, m_HDRRT0_1);
 }
 
 void Renderer::DrawFBOs()
 {
+#if 0
 	// 1. Set FBO 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO0);
 	glViewport(0, 0, 512, 512); // 왼쪽 아래 (0,0)
@@ -1096,6 +1165,15 @@ void Renderer::DrawFBOs()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
 	// 2. Draw
 	DrawGridMesh();
+#endif
+
+	// 1. Set FBO - 12/01 Bloom
+	glBindFramebuffer(GL_FRAMEBUFFER, m_HDRFBO0);
+	glViewport(0, 0, 512, 512);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 화면과 깊이 버퍼 초기화
+	// 2. Draw
+	DrawParticle();
+
 
 	// 3. Restore FBO 
 	glViewport(0, 0, 512, 512);

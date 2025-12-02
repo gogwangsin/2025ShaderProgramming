@@ -86,6 +86,7 @@ private:
 	// Texture
 	GLuint m_RGBTexture = 0;
 	GLuint m_MyTexture = 0;
+	GLuint m_ParticleTex = 0;
 
 	GLuint m_0Texture = 0;
 	GLuint m_1Texture = 0;
@@ -112,11 +113,16 @@ private:
 	GLuint m_RT3 = 0;
 	GLuint m_RT4 = 0;
 
+	GLuint m_HDRRT0_0 = 0; // float point texture를 만들 것이다
+	GLuint m_HDRRT0_1 = 0; // float point texture를 만들 것이다
+
 	// FBOs
 	GLuint m_FBO0 = 0;
 	GLuint m_FBO1 = 0;
 	GLuint m_FBO2 = 0;
 	GLuint m_FBO3 = 0;
 	GLuint m_FBO4 = 0;
+	
+	GLuint m_HDRFBO0 = 0;
 };
 

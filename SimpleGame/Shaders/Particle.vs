@@ -10,7 +10,10 @@ in float a_LifeTime;
 in float a_Mass;
 in float a_Period;
 
+in vec2 a_Tex;
+
 out vec4 v_Color;
+out vec2 v_UV;
 
 // 전체 쉐이더에 동일한 데이터 -> Per Shader Data
 uniform float u_Time;
@@ -98,7 +101,7 @@ void circleParticle_0930()
 	float newTime = u_Time - a_STime;
 	float lifeTime = a_LifeTime;
 	float newAlpha = 1.0;
-	vec4 newPosition = vec4(a_Position, 1);
+	vec4 newPosition = vec4(a_Position.xy * 5, a_Position.z, 1);
 	
 	if( newTime > 0 )
 	{
@@ -130,4 +133,6 @@ void main()
 	// raining();
 	// sinParticle_0930();
 	circleParticle_0930();
+
+	v_UV = a_Tex;
 }

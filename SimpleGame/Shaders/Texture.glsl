@@ -160,9 +160,9 @@ vec4 Pixelization()
 
 void main()
 {
-	//FragColor = texture(u_TexID, vec2(v_Tex.x, 1 - v_Tex.y));  // x는 그대로, y는 반전으로 그리기
+	FragColor = texture(u_TexID, vec2(v_Tex.x, 1 - v_Tex.y));  // x는 그대로, y는 반전으로 그리기
 
-    FragColor = Pixelization();
+    // FragColor = Pixelization();
 	// FragColor = Lens();
 
 	// FragColor = vec4(v_Tex, 0, 1); - 디버깅 하는 팁 좌표가 잘 전달됐는지.
