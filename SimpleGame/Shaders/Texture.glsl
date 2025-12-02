@@ -32,6 +32,26 @@ float noise(vec2 p)
     return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
+vec4 ChromaticAberration(sampler2D tex, vec2 uv, float amount)
+{
+    // 강한 색수차 강도
+    float strength = 0.015;   // 0.003 → 0.015 (5배 이상 강하게)
+
+    // 화면 중앙 기준 거리
+    vec2 center = vec2(0.5, 0.5);
+    float dist = length(uv - center);
+
+    // 채널별 UV 오프셋 (물리색수차 느낌)
+    vec2 offset = (uv - center) * dist * strength;
+
+    // 각 채널을 다른 방향으로 샘플링
+    float r = texture(u_TexID, uv + offset * 1.5).r;  // 적색 더 크게 번짐
+    float g = texture(u_TexID, uv).g;                 // 기본
+    float b = texture(u_TexID, uv - offset * 1.5).b;  // 파란색 반대 방향
+
+    return vec4(r, g, b, 1.0);
+}
+
 vec4 Lens()
 {
     vec2 uv = v_Tex;
@@ -101,13 +121,49 @@ vec4 Lens()
         mixedColor.b + blueBias
     );
 
-    return mixedColor;
+    //---------------------------------------
+    // 7. ★ 비네트 효과 추가 ★
+    //---------------------------------------
+    vec2 centered = uv - 0.5;          // 화면 중심 기준 좌표
+    float dist = length(centered);     // 중심에서 얼마나 떨어졌나
+    float vignetteRadius = 0.65;       // 0.6~0.8 추천
+    float vignettePower  = 2.5;        // 1~3: 자연스러운 어둡기
+
+    float vignette = smoothstep(vignetteRadius, 1.0, dist);
+    vignette = pow(vignette, vignettePower);
+
+    mixedColor.rgb *= (1.0 - vignette * 0.5);
+    // ↑ 0.5는 어둡게 하는 강도
+
+    vec4 color = mixedColor;
+
+    // 색수차 적용
+    vec4 aberr = ChromaticAberration(u_TexID, uv, 0.005);
+
+    // ★ Lens 효과와 색수차를 섞는 블렌드
+    //    0.2 정도면 Lens 효과 유지 + 색수차 강조됨
+    color = mix(color, aberr, 0.5);
+
+    // 필요하면 전체 강도 더 조절 가능
+    return color;
+}
+
+// 모자이크 효과 - 수업
+vec4 Pixelization()
+{
+    // 해상도
+    float resolution = (sin(u_Time)+1) * 100; // 양수로만 나오게 하기 위해 +1
+    float tx = floor(v_Tex.x * resolution) / resolution; // 0~1 -> 0, 0.2, 0.4 ...
+    float ty = floor(v_Tex.y * resolution) / resolution; 
+    return texture(u_TexID, vec2(tx,ty));
 }
 
 void main()
 {
 	//FragColor = texture(u_TexID, vec2(v_Tex.x, 1 - v_Tex.y));  // x는 그대로, y는 반전으로 그리기
-	FragColor = Lens();
+
+    FragColor = Pixelization();
+	// FragColor = Lens();
 
 	// FragColor = vec4(v_Tex, 0, 1); - 디버깅 하는 팁 좌표가 잘 전달됐는지.
 }
