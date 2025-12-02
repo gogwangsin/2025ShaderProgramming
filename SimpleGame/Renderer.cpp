@@ -539,6 +539,31 @@ void Renderer::CreateFBOs()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	// ======================================================================
+	// Lec6 - 13
+	// HDR Texture를 Blur 시켜 빛이 퍼지는 영역 생성 (FBO 코드)
+
+	glGenFramebuffers(2, m_PingpongFBO);
+	glGenTextures(2, m_PingpongTexture);
+	for (int i = 0; i < 2; i++)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_PingpongFBO[i]);
+		glBindTexture(GL_TEXTURE_2D, m_PingpongTexture[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 512, 512, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_PingpongTexture[i], 0);
+
+		status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			std::cout << "fbo creation failed" << std::endl;
+		}
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 
@@ -1099,7 +1124,8 @@ void Renderer::DrawFS()
 
 // ------------------------------------------------------------------------------------
 
-void Renderer::DrawTexture(float x, float y, float sizeX, float sizeY, GLuint TextureID)
+void Renderer::DrawTexture(float x, float y, float sizeX, float sizeY, 
+	GLuint TextureID, GLuint TextureID1, GLuint method)
 {
 	// x, y -> 센터 기준 위치
 	// sx, sy -> 비율 ratio
@@ -1123,6 +1149,8 @@ void Renderer::DrawTexture(float x, float y, float sizeX, float sizeY, GLuint Te
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
 
+	int uMethod = glGetUniformLocation(shader, "u_Method");
+	glUniform1i(uMethod, method);
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	int attribTex = glGetAttribLocation(shader, "a_Tex");
@@ -1143,8 +1171,8 @@ void Renderer::DrawDebugTexture()
 	//DrawTexture(-0.4, -0.8, 0.2, 0.2, m_MyTexture);
 
 	// MRT : Multiple Render Target
-	DrawTexture(-0.5, -0.5, 0.5, 0.5, m_HDRRT0_0);
-	DrawTexture( 0.5, -0.5, 0.5, 0.5, m_HDRRT0_1);
+	DrawTexture(-0.5, -0.5, 0.5, 0.5, m_HDRRT0_0, 0, 0);
+	DrawTexture( 0.5, -0.5, 0.5, 0.5, m_PingpongTexture[0], 0, 0);
 }
 
 void Renderer::DrawFBOs()
@@ -1178,4 +1206,35 @@ void Renderer::DrawFBOs()
 	// 3. Restore FBO 
 	glViewport(0, 0, 512, 512);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawBloomParticle()
+{
+	// 1. Render Particle Effect ( HDR Texture )
+	glBindFramebuffer(GL_FRAMEBUFFER, m_HDRFBO0);
+	glViewport(0, 0, 512, 512);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	DrawParticle();
+
+	// 2. Blur 
+	glBindFramebuffer(GL_FRAMEBUFFER, m_PingpongFBO[0]);
+	DrawTexture(0, 0, 1, 1, m_HDRRT0_1, 0, 1); // 가로 블러 쭉 -> 세로 블러 쭉
+
+	for (int i = 0; i < 20; ++i)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_PingpongFBO[1]);
+		DrawTexture(0, 0, 1, 1, m_PingpongTexture[0], 0, 2);		 // m_PingpongFBO[0]을 다시 m_PingpongFBO[1]에다 그리는 작업을 수행
+		glBindFramebuffer(GL_FRAMEBUFFER, m_PingpongFBO[0]);
+		DrawTexture(0, 0, 1, 1, m_PingpongTexture[1], 0, 1);		// m_PingpongFBO[1]을 다시 m_PingpongFBO[0]에다 그리는 작업을 수행
+	}
+
+
+
+	// 3. Normal Texture + Blurred Texture
+	
+
+	// 4. Restore FBO 
+	glViewport(0, 0, 512, 512);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }

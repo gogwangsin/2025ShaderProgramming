@@ -4,7 +4,10 @@ layout(location=0) out vec4 FragColor;
 // 이 0이 GL_COLOR_ATTACHMENT0 이거 0이랑 같은 곳을 가리키는 것이다 - 아마
 
 uniform sampler2D u_TexID;
+uniform int u_Method; // 0: normal 텍스쳐 매핑, 1: BlurH, 2: BlurV 이 값에 따라 분기
+
 uniform float u_Time;
+const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 in vec2 v_Tex;
 
@@ -158,9 +161,58 @@ vec4 Pixelization()
     return texture(u_TexID, vec2(tx,ty));
 }
 
+//===================================================================
+
+// PPT Lec6-15 코드.
+vec4 BlurHorizontal() // 가로축 Blur 
+{             
+    vec2 tex_offset = 1.0 / textureSize(u_TexID, 0); // gets size of single texel
+    vec3 result = texture(u_TexID, v_Tex).rgb * weight[0]; // current fragment's contribution
+
+    for(int i = 1; i < 5; ++i)
+    {
+        result += texture(u_TexID, v_Tex + vec2(tex_offset.x * i, 0.0)).rgb * weight[i];
+        result += texture(u_TexID, v_Tex - vec2(tex_offset.x * i, 0.0)).rgb * weight[i];
+    }
+
+    return vec4(result, 1.0);
+}
+
+vec4 BlurVertical() // 세로축 Blur 
+{             
+    vec2 tex_offset = 1.0 / textureSize(u_TexID, 0); // gets size of single texel
+    vec3 result = texture(u_TexID, v_Tex).rgb * weight[0]; // current fragment's contribution
+
+    for(int i = 1; i < 5; ++i)
+    {
+        result += texture(u_TexID, v_Tex + vec2(0.0, tex_offset.y * i)).rgb * weight[i];
+        result += texture(u_TexID, v_Tex - vec2(0.0, tex_offset.y * i)).rgb * weight[i];
+    }
+
+    return vec4(result, 1.0);
+}
+
 void main()
-{
-	FragColor = texture(u_TexID, vec2(v_Tex.x, 1 - v_Tex.y));  // x는 그대로, y는 반전으로 그리기
+{   
+    FragColor = vec4(0);
+
+    // uniform 값으로 if 분기문으로 하면 성능이 그렇게 느려지지도 않는다
+    if(u_Method == 0)
+    {
+    	FragColor = texture(u_TexID, vec2(v_Tex.x, 1 - v_Tex.y));    
+    }
+    else if(u_Method == 1)
+    {
+        FragColor = BlurHorizontal();
+    }
+    else if(u_Method == 2)
+    {
+        FragColor = BlurVertical();
+    }
+
+
+
+
 
     // FragColor = Pixelization();
 	// FragColor = Lens();

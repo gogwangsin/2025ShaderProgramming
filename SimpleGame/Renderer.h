@@ -24,9 +24,11 @@ public:
 	void DrawGridMesh();
 	void DrawFullScreenColor(float r, float g, float b, float a);
 	void DrawFS();
-	void DrawTexture(float x, float y, float sizeX, float sizeY, GLuint TextureID);
+	void DrawTexture(float x, float y, float sizeX, float sizeY, 
+		GLuint TextureID, GLuint TextureID1, GLuint method);
 	void DrawDebugTexture();
 	void DrawFBOs();
+	void DrawBloomParticle();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -124,5 +126,9 @@ private:
 	GLuint m_FBO4 = 0;
 	
 	GLuint m_HDRFBO0 = 0;
+	
+	// Blur
+	GLuint m_PingpongFBO[2];
+	GLuint m_PingpongTexture[2];
 };
 

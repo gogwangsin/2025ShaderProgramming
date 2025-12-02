@@ -101,7 +101,7 @@ void circleParticle_0930()
 	float newTime = u_Time - a_STime;
 	float lifeTime = a_LifeTime;
 	float newAlpha = 1.0;
-	vec4 newPosition = vec4(a_Position.xy * 5, a_Position.z, 1);
+	vec4 newPosition = vec4(a_Position.xy * 3, a_Position.z, 1);
 	
 	if( newTime > 0 )
 	{
