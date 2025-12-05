@@ -222,6 +222,8 @@ void Renderer::CreateVertexBufferObjects()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRectFS), fullRectFS, GL_STATIC_DRAW);
 	//----------------------------------------------------------------
 
+	// 수업에선 텍스쳐 좌표계가 왼쪽 상단이 (0,0)이다. ( 대부분 이미지 파일 표준 )
+	// 하지만 기본 OpenGL 렌더 타겟(텍스쳐) 좌표는 왼쪽 하단이 (0,0)이다.
 	float texRect[]
 		=
 	{
@@ -402,12 +404,49 @@ GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
 	}
 
 	GLuint temp;
-	glGenTextures(1, &temp);
-	glBindTexture(GL_TEXTURE_2D, temp);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
+	glGenTextures(1, &temp); // 텍스처 이름 생성 ( textures: 텍스처 ID 
+	glBindTexture(GL_TEXTURE_2D, temp); //  텍스처타깃에 텍스처를 붙인다 ( target: 텍스처타깃 : GL_TEXTURE_1D, GL_TEXTURE_2D…
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]); // 2차원텍스처이미지를정의
+	// target: GL_TEXTURE_2D
+	// level : 텍스처 이미지의 상세한 정도(0으로설정)
+	// internalformat : 각 픽셀에 사용할 컬러수(1~4까지중RGB 이면3, RGBA면4)
+	//				GPU 메모리 내에서 텍스처 데이터를 어떤 형식과 정밀도로 저장할지
+	//					GPU의 내부 저장 형식
+	//				1. GL_RGBA : 기본 비트수 (8비트)
+	//				2. GL_RGBA8 : 가장 일반적 - 각 8비트 총 32비트 ( 4채널 * 8비트 )로 색상 표현 Unsinged ( 0 ~ 255 ) 
+	//							LDR ( Low Dynamic Range )를 저장하는 일반적인 렌더 타겟에서 쓰임
+	//				3. GL_RGBA16F : 고정밀도 부동 소수점 색상 
+	//							HDR ( Hight Dynamic Range ) 렌더링, 
+	//							정밀한 계산이 필요한 데이터 맵(Data Map), 혹은 **후처리 효과(Post-processing)**의 중간 결과물을 저장할 때 사용
+	//							각 채널 당 16비트 ( 총 64비트 : 4 채널 * 16 비트 ) -> 넓은 범위와 높은 정밀도 사용
+	// 
+	// width : 텍스처의 폭(2의지수승)
+	// height : 텍스처 높이(2의지수승)
+	// border : 경계 픽셀수(0으로설정
+	// format: 픽셀 데이터에 대한 포맷(GL_RED, GL_GREEN, GL_BLUE, GL_RGB, GL_RGBA, GL_BGR, GL_BGRA…)
+	// type : 각 픽셀 데이터에 대한 데이터 타입(GL_UNSIGNED_BYTE, GL_BYTE, GL_UNSIGNED_SHORT, GL_SHORT, GL_UNSIGNED_INT…)
+	// data : 메모리의 실제 픽셀 데이터 값
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, samplingMethod);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, samplingMethod);
+	// 텍스처 파라미터를 설정
+	// GL_TEXTURE_MIN_FILTER, GL_TEXTURE_MAG_FILTER: 텍스처 필터링을 위한 파라미터설정
+	//
+	// GL_TEXTURE_MIN_FILTER (축소필터), GL_TEXTURE_MAG_FILTER (확대필터)인경우: 
+	//		GL_NEAREST : 가장 가까운 nearest - neighbor 필터링(픽셀의 근사치 사용) –선명한 이미지 결과
+	//		GL_LINEAR : 이웃한 텍셀의 선형보간 값–더 부드러운 결과
+	//
+	// 텍스쳐 좌표 범위
+	// x축 : s축
+	// y축 : t축 
+	// 왼쪽 하단이 (0, 0)
+	//
+	// 텍스쳐 Target : GL_TEXTURE_2D
+	//				OpenGL의 **상태 기계(State Machine)**에서 현재 작업할 텍스처의 종류를 지정하는 임시 슬롯
+	//				glBindTexture 명령으로 ID를 타깃에 연결해야만, 이후의 glTexParameterf, glTexImage2D 같은 설정 함수들이 
+	//				그 ID의 텍스처 데이터에 적용될 수 있습니다.
+	// ID : m_RTO : 실제 텍스처 데이터 덩어리를 식별하는 이름표
+
 
 	return temp;
 }
@@ -415,13 +454,27 @@ GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
 void Renderer::CreateFBOs()
 {
 	// Generate Color Buffer
-	glGenTextures(1, &m_RT0_0);
-	glBindTexture(GL_TEXTURE_2D, m_RT0_0);
+	glGenTextures(1, &m_RT0_0); // 텍셔츠 저장할 공간 1개 생성하고, 그 ID를 변수에 저장
+	glBindTexture(GL_TEXTURE_2D, m_RT0_0); // 이후의 모든 텍스처 설정 명령이 GL_TEXTURE_2D 타겟을 통해 이 m_RT0_0 ID에 적용되도록 연결(바인딩)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// GL_LINEAR: 밉맵을 사용하지 않고, 현재 텍스처 레벨 0(원본) 주변의 텍셀 4개를 선형 보간하여 색상을 결정합니다
+	// 결국 이 밉맵들을 무시하고 원본 텍스처만 사용하게 됩니다.
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	// 래핑(Wrapping)은 텍스처 좌표가 모델의 크기를 초과하거나(반복), 
+	// 모델의 가장자리 경계를 벗어나는(Clamp) 상황을 처리하여 **예상치 못한 결과(예: 검은색, 깨진 패턴)**가 나오지 않도록 제어
+	// 1. GL_REPEAT	텍스처가 끝에 도달하면 처음부터 다시 시작하여 반복합니다.
+	// 2. GL_CLAMP_TO_EDGE	텍스처가 끝에 도달하면 가장자리 텍셀의 색상을 무한히 늘려서 채웁니다.
+	// 3. GL_MIRRORED_REPEAT	텍스처가 끝에 도달할 때마다 거울처럼 뒤집어서 반복합니다
+
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	//		밉맵(Mipmap)이란?정의: 원본 텍스처의 축소된 복사본들을 미리 여러 해상도로 만들어 두는 것입니다. 
+	//		텍스처 크기를 $1/2$, $1/4$, $1/8$, $\dots$ 로 계속 줄여서 1x1 텍셀이 될 때까지 만듭니다
+	//
+	//		GL_GENERATE_MIPMAP, GL_TRUE: 
+	//		glTexImage2D 명령으로 텍스처 데이터(원본 레벨 0)가 GPU 메모리에 올라갈 때, OpenGL이 자동으로 나머지 모든 저해상도 밉맵 레벨을 계산하여 생성하고 저장
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	glGenTextures(1, &m_RT0_1);

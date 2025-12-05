@@ -88,6 +88,12 @@ int main(int argc, char **argv)
 
 	// Initialize GL things
 	glutInit(&argc, argv);
+
+	// 윈도우가 가지고 있는 프레임버퍼에 OpenGL이 그림을 그릴 수 있게 하는 작업은 복잡함
+	// glut 에선 복잡한 과정을 아래 함수로 간략화 하여 사용할 수 있는 기능을 제공함
+	// 채널 당 RGBA 값을 가지는 1024X1024 크기의 윈도우를 생성하고 
+	// 윈도우의 Framebuffer 를 OpenGL 렌더링 타겟으로 설정
+	// Double buffering 이기 때문에 두 개의 Framebuffer 들이 만들어 짐
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(winX, winY);
