@@ -165,6 +165,9 @@ vec4 Pixelization()
 //===================================================================
 
 // PPT Lec6-15 코드.
+// 이 코드는 **가우시안 블러(Gaussian Blur)**를 **선형적으로 분리(Separable)**하여 구현한 셰이더
+// 가우시안 블러는 주변 픽셀의 색상을 가져와 **가중치(Weight)**를 곱한 후 
+// 합산하여 평균을 내는 방식으로 이미지를 흐리게 만듭니다.
 vec4 BlurHorizontal() // 가로축 Blur 
 {             
     vec2 tex_offset = 1.0 / textureSize(u_TexID, 0); // gets size of single texel

@@ -463,6 +463,7 @@ void Renderer::CreateFBOs()
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	// 래핑(Wrapping)은 텍스처 좌표가 모델의 크기를 초과하거나(반복), 
+
 	// 모델의 가장자리 경계를 벗어나는(Clamp) 상황을 처리하여 **예상치 못한 결과(예: 검은색, 깨진 패턴)**가 나오지 않도록 제어
 	// 1. GL_REPEAT	텍스처가 끝에 도달하면 처음부터 다시 시작하여 반복합니다.
 	// 2. GL_CLAMP_TO_EDGE	텍스처가 끝에 도달하면 가장자리 텍셀의 색상을 무한히 늘려서 채웁니다.
@@ -491,7 +492,12 @@ void Renderer::CreateFBOs()
 	glGenRenderbuffers(1, &depthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+	// 활성화된 렌더버퍼(즉, depthBuffer)의 메모리를 할당합니다.
+	// 깊이 정보를 저장할 포맷(GL_DEPTH_COMPONENT)으로 512 512 크기의 공간을 예약합니다. 
+	// (이것이 깊이 버퍼의 실제 데이터가 저장되는 곳입니다.)
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	// 0의 의미: OpenGL에서 ID 0은 항상 "기본값(Default)" 또는 **"아무것도 아님(Null)"**을 의미합니다. 
+	// FBO와 마찬가지로, glBindRenderbuffer 함수에 0을 넣으면 현재 바인딩 상태를 비활성화
 
 	// Generate FBO
 	glGenFramebuffers(1, &m_FBO0);
@@ -595,6 +601,8 @@ void Renderer::CreateFBOs()
 	// ======================================================================
 	// Lec6 - 13
 	// HDR Texture를 Blur 시켜 빛이 퍼지는 영역 생성 (FBO 코드)
+	// 핑퐁 기법 -> 독립적 렌더 타겟을 2개를 만들어서 가로 블러 저장, 여기에 세로 블러 저장, 여기에 가로 등등
+	// 여러번 누적시켜서 나중에 원본이랑 합치면 Bloom이 됨
 
 	glGenFramebuffers(2, m_PingpongFBO);
 	glGenTextures(2, m_PingpongTexture);
@@ -702,6 +710,18 @@ void Renderer::DrawParticle()
 	GLuint shader = m_ParticleShader;
 	glUseProgram(shader);
 
+	// *다중 렌더 타겟(MRT)**이 활성화
+	// layout(location=0) out vec4 FragColor;
+	//		의 출력은 m_HDRFBO0의 Attachment 0에 연결된 렌더 타겟인 **m_HDRRT0_0**에 저장됩니다. 
+	//		(→ 원본 씬 또는 원본 파티클)
+	// 
+	// layout(location = 1) out vec4 FragColor1; 
+	//		의 출력은 m_HDRFBO0의 Attachment 1에 연결된 렌더 타겟인 **m_HDRRT0_1 **에 저장됩니다.
+	//		(→ 밝은 부분만 분리된 데이터)
+	// 
+	// 핵심: 이 첫 드로우 콜에서 
+	// **m_HDRRT0_0 (원본)**과 m_HDRRT0_1 (블룸 원본) 
+	// 두 텍스처에 데이터가 동시에 분리되어 저장됩니다.
 	GLenum DrawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	glDrawBuffers(2, DrawBuffers);
 
@@ -1287,7 +1307,10 @@ void Renderer::DrawBloomParticle()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// -> 마지막 화면
 	// **최종 출력 타겟은 화면(스크린 버퍼)**로 바인딩 -> 솔루션 재빌드해서 실행하면 안보임
-	// 
+
 	// 3. Normal Texture + Blurred Texture
 	DrawTexture(0, 0, 1, 1, m_HDRRT0_0, m_PingpongTexture[0], 3);
+	// 이때 셰이더는 m_HDRRT0_0 (원본 파티클)과 m_PingpongTexture[0] (최종 블러 결과) 
+	// 두 개의 텍스처를 입력으로 받아 샘플링하고, 두 결과를 합치는 합성 로직(method 3)을 실행합니다.
+	// 핵심: 최종적으로 합성된 결과의 픽셀 색상이 스크린 버퍼에 렌더링되어 사용자 화면에 표시됩니다.
 }
