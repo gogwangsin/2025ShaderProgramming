@@ -1285,7 +1285,9 @@ void Renderer::DrawBloomParticle()
 
 	glViewport(0, 0, 512, 512);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+	// -> 마지막 화면
+	// **최종 출력 타겟은 화면(스크린 버퍼)**로 바인딩 -> 솔루션 재빌드해서 실행하면 안보임
+	// 
 	// 3. Normal Texture + Blurred Texture
 	DrawTexture(0, 0, 1, 1, m_HDRRT0_0, m_PingpongTexture[0], 3);
 }
